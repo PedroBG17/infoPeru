@@ -139,3 +139,19 @@ model AnalyticsLog {
   @@index([path])
   @@index([createdAt])
 }
+
+// Modelo de Artículos / Noticias (Migrado de WordPress a Supabase)
+model Post {
+  id        String   @id @default(uuid())
+  title     String
+  slug      String   @unique
+  content   String   // Contenido HTML o estructurado
+  excerpt   String?  // Breve resumen
+  published Boolean  @default(true)
+  author    String   @default("Redacción Central")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+}
+

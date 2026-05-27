@@ -13,6 +13,7 @@ ALTER TABLE public."Hospital" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public."SEOConfig" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public."Lead" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public."AnalyticsLog" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."Post" ENABLE ROW LEVEL SECURITY;
 
 -- =============================================================
 -- 2. TABLAS PÚBLICAS (Lectura anónima permitida, escritura denegada)
@@ -65,6 +66,13 @@ CREATE POLICY "Hospital: lectura pública"
 DROP POLICY IF EXISTS "SEOConfig: lectura pública" ON public."SEOConfig";
 CREATE POLICY "SEOConfig: lectura pública"
   ON public."SEOConfig" FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- Post: Solo lectura pública
+DROP POLICY IF EXISTS "Post: lectura pública" ON public."Post";
+CREATE POLICY "Post: lectura pública"
+  ON public."Post" FOR SELECT
   TO anon, authenticated
   USING (true);
 

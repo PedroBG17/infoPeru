@@ -1,6 +1,7 @@
 import React from 'react';
 import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
+import { PostManager } from './post-manager';
 import { 
   Users, 
   BarChart3, 
@@ -11,21 +12,31 @@ import {
   MapPin, 
   Mail, 
   Phone,
-  ArrowUpRight
+  FileText
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
+interface PageProps {
+  searchParams: Promise<{
+    tab?: string;
+  }>;
+}
+
 export async function generateMetadata() {
   return getMetadata({
-    title: 'Panel de Administración - Leads y Auditoría',
-    description: 'Consola interna de DataPerú para el seguimiento de leads de monetización y auditoría de accesos.',
+    title: 'Panel de Administración - Leads y Noticias',
+    description: 'Consola interna de DataPerú para el seguimiento de leads de monetización y administración de noticias.',
     slug: '/admin/dashboard',
     noIndex: true // Los motores de búsqueda jamás deben indexar la administración
   });
 }
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
+  const activeTab = resolvedSearchParams.tab || 'leads';
+  const isNoticiasTab = activeTab === 'noticias';
+
   // 1. Obtener métricas generales
   const totalLeads = await prisma.lead.count();
   const leads24h = await prisma.lead.count({
@@ -37,6 +48,7 @@ export default async function AdminDashboardPage() {
   });
 
   const totalLogs = await prisma.analyticsLog.count();
+  const totalPosts = await prisma.post.count();
 
   // 2. Obtener leads agrupados por sector para métricas de negocio
   const leadsBySector = await prisma.lead.groupBy({
@@ -69,6 +81,11 @@ export default async function AdminDashboardPage() {
     take: 8
   });
 
+  // 5. Obtener todos los artículos/noticias para la pestaña de noticias
+  const posts = await prisma.post.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
       {/* Dashboard Layout Header */}
@@ -80,7 +97,7 @@ export default async function AdminDashboardPage() {
             </div>
             <div>
               <span className="font-extrabold text-sm tracking-wide uppercase text-teal-400">DataPerú Admin</span>
-              <span className="block text-[10px] text-slate-500">Panel de Control Interno v1.0</span>
+              <span className="block text-[10px] text-slate-500">Panel de Control Interno v1.1</span>
             </div>
           </div>
           
@@ -96,7 +113,7 @@ export default async function AdminDashboardPage() {
         {/* Welcome Section */}
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Consola de Control</h1>
-          <p className="text-sm text-slate-400 mt-1">Supervisión y control de monetización regional, captación de prospectos y accesos Edge.</p>
+          <p className="text-sm text-slate-400 mt-1">Supervisión y control de monetización regional, noticias en Supabase y accesos Edge.</p>
         </div>
 
         {/* Stats Grid */}
@@ -125,167 +142,186 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Card 3: Auditoría Logs */}
+          {/* Card 3: Noticias / Artículos */}
+          <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-xs">
+            <div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Artículos en DB</span>
+              <span className="text-3xl font-extrabold mt-2 block text-cyan-400">{totalPosts}</span>
+              <span className="text-[10px] text-slate-500 mt-1 block">Noticias creadas en Supabase</span>
+            </div>
+            <div className="w-12 h-12 bg-cyan-950/40 text-cyan-400 rounded-xl flex items-center justify-center border border-cyan-900/30">
+              <FileText className="w-6 h-6" />
+            </div>
+          </div>
+
+          {/* Card 4: Auditoría Logs */}
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-xs">
             <div>
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Logs Auditoría</span>
               <span className="text-3xl font-extrabold mt-2 block">{totalLogs}</span>
-              <span className="text-[10px] text-slate-500 mt-1 block">Peticiones auditadas</span>
+              <span className="text-[10px] text-slate-500 mt-1 block">Peticiones Edge registradas</span>
             </div>
-            <div className="w-12 h-12 bg-slate-800 text-cyan-400 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-slate-800 text-amber-400 rounded-xl flex items-center justify-center">
               <ShieldAlert className="w-6 h-6" />
             </div>
           </div>
-
-          {/* Card 4: Tasa de Conversión */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-xs">
-            <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Distribución</span>
-              <span className="text-3xl font-extrabold mt-2 block">
-                {leadsBySector.length} <span className="text-sm font-normal text-slate-500">Sectores</span>
-              </span>
-              <span className="text-[10px] text-slate-500 mt-1 block">Monetizados activamente</span>
-            </div>
-            <div className="w-12 h-12 bg-slate-800 text-amber-400 rounded-xl flex items-center justify-center">
-              <BarChart3 className="w-6 h-6" />
-            </div>
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Panel: Leads list */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-md">
-              <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold">Prospectos Recientes (Leads)</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Últimos envíos de usuarios interesados en servicios.</p>
-                </div>
-                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 text-xs font-semibold rounded-xl transition-all">
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-400" />
-                  Exportar CSV
-                </button>
-              </div>
+        {/* Tab Navigation */}
+        <div className="flex border-b border-slate-900 gap-6">
+          <a 
+            href="/admin/dashboard?tab=leads" 
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${!isNoticiasTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+          >
+            Leads y Auditoría
+          </a>
+          <a 
+            href="/admin/dashboard?tab=noticias" 
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${isNoticiasTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+          >
+            Gestión de Noticias
+          </a>
+        </div>
 
-              {recentLeads.length === 0 ? (
-                <div className="p-12 text-center text-slate-500 text-sm">
-                  No hay prospectos registrados actualmente en la base de datos.
+        {/* Tab Contents */}
+        {isNoticiasTab ? (
+          <PostManager initialPosts={posts} />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-200">
+            {/* Main Panel: Leads list */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-md">
+                <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold">Prospectos Recientes (Leads)</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Últimos envíos de usuarios interesados en servicios.</p>
+                  </div>
+                  <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 text-xs font-semibold rounded-xl transition-all">
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-teal-400" />
+                    Exportar CSV
+                  </button>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-slate-300">
-                    <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
-                      <tr>
-                        <th className="px-6 py-4">Contacto</th>
-                        <th className="px-6 py-4">Ubicación</th>
-                        <th className="px-6 py-4">Sector</th>
-                        <th className="px-6 py-4">Fecha</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-850 divide-slate-800/60">
-                      {recentLeads.map((lead) => (
-                        <tr key={lead.id} className="hover:bg-slate-850 hover:bg-slate-800/10 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="font-semibold text-slate-100">{lead.name}</div>
-                            <div className="flex items-center space-x-2 text-xs text-slate-500 mt-1">
-                              <span className="flex items-center"><Mail className="w-3 h-3 mr-1" /> {lead.email}</span>
-                              <span>•</span>
-                              <span className="flex items-center"><Phone className="w-3 h-3 mr-1" /> {lead.phone}</span>
-                            </div>
-                            {lead.message && (
-                              <p className="text-xs text-slate-450 text-slate-400 mt-2 bg-slate-950 p-2.5 rounded-lg border border-slate-850 border-slate-800/40">
-                                {lead.message}
-                              </p>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="flex items-center text-xs text-slate-400">
-                              <MapPin className="w-3.5 h-3.5 mr-1 text-slate-500" />
-                              {lead.city.name}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-950 text-teal-400 border border-teal-900/30">
-                              {sectorNames[lead.sectorId] || lead.sectorId}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">
-                            <span className="flex items-center">
-                              <Clock className="w-3.5 h-3.5 mr-1 text-slate-600" />
-                              {new Date(lead.createdAt).toLocaleDateString('es-PE', {
-                                day: 'numeric',
-                                month: 'short',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Sidebar: Audit Logs & Sectors */}
-          <aside className="space-y-6">
-            {/* Leads by Sector chart list */}
-            <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-sm">
-              <h3 className="font-bold text-lg mb-4 text-slate-100">Distribución de Leads</h3>
-              <div className="space-y-3">
-                {leadsBySector.map((sec) => {
-                  const percent = totalLeads > 0 ? (sec._count.id / totalLeads) * 100 : 0;
-                  return (
-                    <div key={sec.sectorId} className="space-y-1">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-slate-400">{sectorNames[sec.sectorId] || sec.sectorId}</span>
-                        <span>{sec._count.id} ({percent.toFixed(0)}%)</span>
-                      </div>
-                      <div className="h-2 w-full bg-slate-950 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-teal-500 rounded-full" 
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Audit Log Box */}
-            <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-sm space-y-4">
-              <h3 className="font-bold text-lg text-slate-100 flex items-center">
-                <ShieldAlert className="w-5 h-5 mr-2 text-cyan-400" />
-                Auditoría de Accesos
-              </h3>
-              <div className="space-y-3">
-                {recentLogs.length === 0 ? (
-                  <p className="text-xs text-slate-500">No hay registros de auditoría.</p>
+                {recentLeads.length === 0 ? (
+                  <div className="p-12 text-center text-slate-500 text-sm">
+                    No hay prospectos registrados actualmente en la base de datos.
+                  </div>
                 ) : (
-                  recentLogs.map((log) => (
-                    <div key={log.id} className="p-3 bg-slate-950 border border-slate-850 border-slate-800/40 rounded-xl space-y-1">
-                      <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold">
-                        <span className="text-cyan-400 uppercase tracking-wide truncate max-w-[120px]">{log.device}</span>
-                        <span>
-                          {new Date(log.createdAt).toLocaleTimeString('es-PE', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit'
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-350 font-mono truncate">{log.path}</p>
-                      <span className="text-[10px] text-slate-500 block">IP Geo: {log.ciudadIp || 'Desconocido'}</span>
-                    </div>
-                  ))
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm text-slate-300">
+                      <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
+                        <tr>
+                          <th className="px-6 py-4">Contacto</th>
+                          <th className="px-6 py-4">Ubicación</th>
+                          <th className="px-6 py-4">Sector</th>
+                          <th className="px-6 py-4">Fecha</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-850 divide-slate-800/60">
+                        {recentLeads.map((lead) => (
+                          <tr key={lead.id} className="hover:bg-slate-800/10 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="font-semibold text-slate-100">{lead.name}</div>
+                              <div className="flex items-center space-x-2 text-xs text-slate-500 mt-1">
+                                <span className="flex items-center"><Mail className="w-3 h-3 mr-1" /> {lead.email}</span>
+                                <span>•</span>
+                                <span className="flex items-center"><Phone className="w-3 h-3 mr-1" /> {lead.phone}</span>
+                              </div>
+                              {lead.message && (
+                                <p className="text-xs text-slate-400 mt-2 bg-slate-950 p-2.5 rounded-lg border border-slate-850 border-slate-800/40">
+                                  {lead.message}
+                                </p>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="flex items-center text-xs text-slate-400">
+                                <MapPin className="w-3.5 h-3.5 mr-1 text-slate-500" />
+                                {lead.city.name}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-950 text-teal-400 border border-teal-900/30">
+                                {sectorNames[lead.sectorId] || lead.sectorId}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">
+                              <span className="flex items-center">
+                                <Clock className="w-3.5 h-3.5 mr-1 text-slate-600" />
+                                {new Date(lead.createdAt).toLocaleDateString('es-PE', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
             </div>
-          </aside>
-        </div>
+
+            {/* Sidebar: Audit Logs & Sectors */}
+            <aside className="space-y-6">
+              {/* Leads by Sector chart list */}
+              <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-sm">
+                <h3 className="font-bold text-lg mb-4 text-slate-100">Distribución de Leads</h3>
+                <div className="space-y-3">
+                  {leadsBySector.map((sec) => {
+                    const percent = totalLeads > 0 ? (sec._count.id / totalLeads) * 100 : 0;
+                    return (
+                      <div key={sec.sectorId} className="space-y-1">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-slate-400">{sectorNames[sec.sectorId] || sec.sectorId}</span>
+                          <span>{sec._count.id} ({percent.toFixed(0)}%)</span>
+                        </div>
+                        <div className="h-2 w-full bg-slate-950 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-teal-500 rounded-full" 
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Audit Log Box */}
+              <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-sm space-y-4">
+                <h3 className="font-bold text-lg text-slate-100 flex items-center">
+                  <ShieldAlert className="w-5 h-5 mr-2 text-cyan-400" />
+                  Auditoría de Accesos
+                </h3>
+                <div className="space-y-3">
+                  {recentLogs.length === 0 ? (
+                    <p className="text-xs text-slate-500">No hay registros de auditoría.</p>
+                  ) : (
+                    recentLogs.map((log) => (
+                      <div key={log.id} className="p-3 bg-slate-950 border border-slate-850 border-slate-800/40 rounded-xl space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold">
+                          <span className="text-cyan-400 uppercase tracking-wide truncate max-w-[120px]">{log.device}</span>
+                          <span>
+                            {new Date(log.createdAt).toLocaleTimeString('es-PE', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-350 font-mono truncate">{log.path}</p>
+                        <span className="text-[10px] text-slate-500 block">IP Geo: {log.ciudadIp || 'Desconocido'}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </aside>
+          </div>
+        )}
       </main>
     </div>
   );
