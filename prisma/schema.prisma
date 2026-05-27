@@ -1,0 +1,141 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")     // Connection Pooler (Transaction Mode)
+  directUrl = env("DIRECT_URL")       // Direct connection to Supabase (Session Mode)
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Modelo de Departamentos de Perú
+model Departamento {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  ciudades  Ciudad[]
+  createdAt DateTime @default(now())
+}
+
+// Modelo de Ciudades / Provincias de Perú
+model Ciudad {
+  id              String                @id @default(uuid())
+  name            String
+  slug            String                @unique
+  departamentoId  String
+  departamento    Departamento          @relation(fields: [departamentoId], references: [id])
+  sedes           SedeOficina[]
+  procedimientos  ProcedimientoCiudad[]
+  hospitales      Hospital[]
+  leads           Lead[]
+  createdAt       DateTime              @default(now())
+
+  @@index([slug])
+}
+
+// Estructura Core para Trámites (Evergreen template)
+model Procedimiento {
+  id             String                @id @default(uuid())
+  title          String
+  slug           String                @unique
+  description    String
+  requisitos     String[]              // Requisitos del trámite (array de strings)
+  ciudadesRel    ProcedimientoCiudad[]
+  seoConfigId    String?               @unique
+  seoConfig      SEOConfig?            @relation(fields: [seoConfigId], references: [id])
+  createdAt      DateTime              @default(now())
+
+  @@index([slug])
+}
+
+// Tabla de Relación Intermedia para Programación pSEO (Trámite por Ciudad)
+model ProcedimientoCiudad {
+  id              String        @id @default(uuid())
+  procedimientoId String
+  procedimiento   Procedimiento @relation(fields: [procedimientoId], references: [id], onDelete: Cascade)
+  ciudadId        String
+  ciudad          Ciudad        @relation(fields: [ciudadId], references: [id], onDelete: Cascade)
+  costo           Float         @default(0.0)
+  pasos           Json          // Estructura de pasos del trámite [{titulo: String, descripcion: String}]
+  faq             Json          // Estructura FAQ [{question: String, answer: String}]
+  sedes           SedeOficina[]
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([procedimientoId, ciudadId])
+  @@index([procedimientoId])
+  @@index([ciudadId])
+}
+
+// Modelo para Sedes Físicas y Oficinas de Atención en cada Ciudad
+model SedeOficina {
+  id                    String               @id @default(uuid())
+  nombre                String
+  direccion             String
+  latitud               Float?
+  longitud              Float?
+  horario               String
+  contacto              String?
+  ciudadId              String
+  ciudad                Ciudad               @relation(fields: [ciudadId], references: [id])
+  procedimientoCiudadId String?
+  procedimientoCiudad   ProcedimientoCiudad? @relation(fields: [procedimientoCiudadId], references: [id])
+  createdAt             DateTime             @default(now())
+}
+
+// Directorio de Salud (Hospitales / Clínicas) por Ciudad
+model Hospital {
+  id         String   @id @default(uuid())
+  nombre     String
+  slug       String   @unique
+  tipo       String   // e.g. "MINSA", "ESSALUD", "Privado"
+  direccion  String
+  telefono   String?
+  horario24h Boolean  @default(true)
+  ciudadId   String
+  ciudad     Ciudad   @relation(fields: [ciudadId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([ciudadId])
+}
+
+// Tablas de SEO Avanzado y Configuración
+model SEOConfig {
+  id              String         @id @default(uuid())
+  metaTitle       String?
+  metaDescription String?
+  keywords        String[]
+  schemaMarkup    Json?
+  robotsDirective String         @default("index, follow")
+  procedimiento   Procedimiento?
+  createdAt       DateTime       @default(now())
+}
+
+// Captura de Leads locales para Monetización
+model Lead {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  message   String?
+  cityId    String
+  city      Ciudad   @relation(fields: [cityId], references: [id])
+  sectorId  String
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+// Registro de Analítica Ligera en el Edge para auditoría interna
+model AnalyticsLog {
+  id        String   @id @default(uuid())
+  path      String
+  referrer  String?
+  device    String
+  ciudadIp  String?
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
+}
