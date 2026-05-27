@@ -20,6 +20,20 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/salud',
+        destination: '/hospitales',
+        permanent: true,
+      },
+      {
+        source: '/directorios',
+        destination: '/tramites',
+        permanent: true,
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig

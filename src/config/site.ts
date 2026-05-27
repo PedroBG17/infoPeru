@@ -19,16 +19,12 @@ export const siteConfig = {
       href: '/tramites',
     },
     {
-      title: 'Salud',
-      href: '/salud',
+      title: 'Hospitales',
+      href: '/hospitales',
     },
     {
-      title: 'Empleos',
+      title: 'Bolsa de Empleo',
       href: '/trabajos',
-    },
-    {
-      title: 'Directorios',
-      href: '/directorios',
     },
   ],
 };
