@@ -46,13 +46,16 @@ export function PostManager({ initialPosts }: PostManagerProps) {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setTitle(val);
-    // Generate clean slug
+    // Generate clean slug with accent normalization
     const cleaned = val
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9\s-_]/g, '') // remove special chars
-      .replace(/\s+/g, '-')          // replace spaces with dashes
-      .replace(/-+/g, '-');          // merge multiple dashes
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove accent marks
+      .replace(/ñ/g, 'n')              // replace ñ with n
+      .replace(/[^a-z0-9\s-_]/g, '')   // remove other special characters
+      .replace(/\s+/g, '-')            // replace spaces with dashes
+      .replace(/-+/g, '-');            // merge multiple dashes
     setSlug(cleaned);
   };
 

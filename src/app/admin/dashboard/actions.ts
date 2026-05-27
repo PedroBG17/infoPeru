@@ -19,10 +19,13 @@ export async function createPostAction(prevState: any, formData: FormData) {
       return { error: 'El título, slug y contenido son campos obligatorios.' };
     }
 
-    // Clean and validate slug
+    // Clean and validate slug with accent normalization
     const slug = slugRaw
       .toLowerCase()
       .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove accent marks
+      .replace(/ñ/g, 'n')              // replace ñ with n
       .replace(/[^a-z0-9-_]/g, '-')
       .replace(/-+/g, '-');
 
