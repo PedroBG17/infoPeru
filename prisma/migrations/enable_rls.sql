@@ -20,42 +20,49 @@ ALTER TABLE public."AnalyticsLog" ENABLE ROW LEVEL SECURITY;
 -- =============================================================
 
 -- Departamento: Solo lectura pública
+DROP POLICY IF EXISTS "Departamento: lectura pública" ON public."Departamento";
 CREATE POLICY "Departamento: lectura pública"
   ON public."Departamento" FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- Ciudad: Solo lectura pública
+DROP POLICY IF EXISTS "Ciudad: lectura pública" ON public."Ciudad";
 CREATE POLICY "Ciudad: lectura pública"
   ON public."Ciudad" FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- Procedimiento: Solo lectura pública
+DROP POLICY IF EXISTS "Procedimiento: lectura pública" ON public."Procedimiento";
 CREATE POLICY "Procedimiento: lectura pública"
   ON public."Procedimiento" FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- ProcedimientoCiudad: Solo lectura pública
+DROP POLICY IF EXISTS "ProcedimientoCiudad: lectura pública" ON public."ProcedimientoCiudad";
 CREATE POLICY "ProcedimientoCiudad: lectura pública"
   ON public."ProcedimientoCiudad" FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- SedeOficina: Solo lectura pública
+DROP POLICY IF EXISTS "SedeOficina: lectura pública" ON public."SedeOficina";
 CREATE POLICY "SedeOficina: lectura pública"
   ON public."SedeOficina" FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- Hospital: Solo lectura pública
+DROP POLICY IF EXISTS "Hospital: lectura pública" ON public."Hospital";
 CREATE POLICY "Hospital: lectura pública"
   ON public."Hospital" FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- SEOConfig: Solo lectura pública
+DROP POLICY IF EXISTS "SEOConfig: lectura pública" ON public."SEOConfig";
 CREATE POLICY "SEOConfig: lectura pública"
   ON public."SEOConfig" FOR SELECT
   TO anon, authenticated
@@ -69,11 +76,13 @@ CREATE POLICY "SEOConfig: lectura pública"
 -- =============================================================
 
 -- Lead: Solo inserción desde usuarios autenticados, lectura solo service_role
+DROP POLICY IF EXISTS "Lead: inserción autenticada" ON public."Lead";
 CREATE POLICY "Lead: inserción autenticada"
   ON public."Lead" FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Lead: lectura solo admin" ON public."Lead";
 CREATE POLICY "Lead: lectura solo admin"
   ON public."Lead" FOR SELECT
   TO authenticated
