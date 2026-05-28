@@ -47,7 +47,7 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50">
       {/* Hero Section Premium con Gradientes y Cristalografía (Glassmorphism) */}
-      <section className="relative overflow-hidden bg-slate-900 py-16 lg:py-24 text-white border-b border-slate-800">
+      <section className="relative overflow-visible bg-slate-900 py-16 lg:py-24 text-white border-b border-slate-800">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/35 via-slate-900 to-slate-950 -z-10" />
         <div className="absolute inset-0 bg-grid-white/[0.015] -z-10" />
         
