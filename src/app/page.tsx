@@ -98,6 +98,16 @@ export default async function HomePage() {
                 key={post.id} 
                 className="md:col-span-3 bg-white dark:bg-slate-900 border border-slate-250/60 dark:border-slate-800/80 rounded-3xl p-6 md:p-10 shadow-xs hover:shadow-md transition-all group relative overflow-hidden flex flex-col md:flex-row gap-8 justify-between"
               >
+                {post.coverImage && (
+                  <div className="w-full md:w-2/5 shrink-0 overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-850 dark:border-slate-800 shadow-sm">
+                    <img 
+                      src={post.coverImage} 
+                      alt={post.title} 
+                      className="w-full h-full min-h-[220px] object-cover aspect-video hover:scale-[1.02] transition-transform duration-500"
+                    />
+                  </div>
+                )}
+                
                 <div className="flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
@@ -151,35 +161,47 @@ export default async function HomePage() {
                 key={post.id} 
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 rounded-3xl shadow-xs hover:shadow-md transition-all hover:-translate-y-1 flex flex-col justify-between group"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      {new Date(post.createdAt).toLocaleDateString('es-PE', {
-                        day: 'numeric',
-                        month: 'short'
-                      })}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3 text-slate-400" />
-                      {post.author.split(' ')[0]}
-                    </span>
-                  </div>
-
-                  <h4 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-3 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors leading-snug">
-                    <a href={`/${post.slug}`}>{post.title}</a>
-                  </h4>
-
-                  {post.excerpt && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                      {post.excerpt}
-                    </p>
+                <div>
+                  {post.coverImage && (
+                    <div className="mb-4 overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-850 dark:border-slate-800 shadow-xs h-44">
+                      <img 
+                        src={post.coverImage} 
+                        alt={post.title} 
+                        className="w-full h-full object-cover aspect-video group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    </div>
                   )}
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        {new Date(post.createdAt).toLocaleDateString('es-PE', {
+                          day: 'numeric',
+                          month: 'short'
+                        })}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <User className="w-3 h-3 text-slate-400" />
+                        {post.author.split(' ')[0]}
+                      </span>
+                    </div>
+
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-3 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors leading-snug">
+                      <a href={`/${post.slug}`}>{post.title}</a>
+                    </h4>
+
+                    {post.excerpt && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                        {post.excerpt}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <a 
                   href={`/${post.slug}`} 
-                  className="mt-6 inline-flex h-9 items-center justify-center rounded-xl bg-slate-50 hover:bg-teal-600 dark:bg-slate-850 dark:hover:bg-teal-600 text-slate-700 dark:text-slate-350 hover:text-white dark:hover:text-white border border-slate-150 hover:border-teal-600 dark:border-slate-800 py-2.5 text-xs font-bold transition-all gap-1 active:scale-95"
+                  className="mt-6 inline-flex h-9 items-center justify-center rounded-xl bg-slate-50 hover:bg-teal-600 dark:bg-slate-850 dark:hover:bg-teal-600 text-slate-700 dark:text-slate-355 hover:text-white dark:hover:text-white border border-slate-150 hover:border-teal-600 dark:border-slate-800 py-2.5 text-xs font-bold transition-all gap-1 active:scale-95"
                 >
                   Continuar leyendo
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />

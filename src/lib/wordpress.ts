@@ -6,6 +6,7 @@ interface WordPressPage {
   content: string;
   date: string;
   authorName: string;
+  coverImage?: string | null;
 }
 
 /**
@@ -28,6 +29,7 @@ export async function getWordPressPageBySlug(slug: string): Promise<WordPressPag
         content: post.content,
         date: post.createdAt.toISOString(),
         authorName: post.author,
+        coverImage: post.coverImage,
       };
     }
   } catch (error) {

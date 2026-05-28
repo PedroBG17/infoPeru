@@ -14,6 +14,7 @@ export async function createPostAction(prevState: any, formData: FormData) {
     const content = formData.get('content') as string;
     const excerpt = formData.get('excerpt') as string;
     const author = formData.get('author') as string;
+    const coverImage = formData.get('coverImage') as string;
 
     if (!title || !slugRaw || !content) {
       return { error: 'El título, slug y contenido son campos obligatorios.' };
@@ -49,6 +50,7 @@ export async function createPostAction(prevState: any, formData: FormData) {
         slug,
         content: content.trim(),
         excerpt: excerpt ? excerpt.trim() : null,
+        coverImage: coverImage ? coverImage.trim() : null,
         author: author ? author.trim() : 'Redacción Central',
         published: true,
       },

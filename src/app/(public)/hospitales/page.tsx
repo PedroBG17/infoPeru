@@ -29,9 +29,9 @@ export default async function Page() {
   });
 
   const breadcrumbs = [
-    { name: 'Inicio', url: 'https://dataperu.pe' },
-    { name: 'Directorios', url: 'https://dataperu.pe/directorios' },
-    { name: 'Salud y Hospitales', url: 'https://dataperu.pe/hospitales' },
+    { name: 'Inicio', url: '/' },
+    { name: 'Directorios', url: '/directorios' },
+    { name: 'Salud y Hospitales', url: '/hospitales' },
   ];
 
   return (

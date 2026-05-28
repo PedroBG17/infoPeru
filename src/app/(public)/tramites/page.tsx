@@ -29,8 +29,8 @@ export default async function Page() {
   });
 
   const breadcrumbs = [
-    { name: 'Inicio', url: 'https://dataperu.pe' },
-    { name: 'Trámites', url: 'https://dataperu.pe/tramites' },
+    { name: 'Inicio', url: '/' },
+    { name: 'Trámites', url: '/tramites' },
   ];
 
   return (

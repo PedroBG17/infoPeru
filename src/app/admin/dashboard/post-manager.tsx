@@ -21,6 +21,7 @@ interface Post {
   title: string;
   slug: string;
   excerpt: string | null;
+  coverImage?: string | null;
   author: string;
   createdAt: Date;
 }
@@ -39,6 +40,7 @@ export function PostManager({ initialPosts }: PostManagerProps) {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [excerpt, setExcerpt] = useState('');
+  const [coverImage, setCoverImage] = useState('');
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
 
@@ -68,6 +70,7 @@ export function PostManager({ initialPosts }: PostManagerProps) {
     formData.append('slug', slug);
     formData.append('content', content);
     formData.append('excerpt', excerpt);
+    formData.append('coverImage', coverImage);
     formData.append('author', author);
 
     startTransition(async () => {
@@ -82,6 +85,7 @@ export function PostManager({ initialPosts }: PostManagerProps) {
           title,
           slug,
           excerpt: excerpt || null,
+          coverImage: coverImage || null,
           author: author || 'Redacción Central',
           createdAt: new Date(),
         };
@@ -90,6 +94,7 @@ export function PostManager({ initialPosts }: PostManagerProps) {
         setTitle('');
         setSlug('');
         setExcerpt('');
+        setCoverImage('');
         setContent('');
         setAuthor('');
         setIsNewFormOpen(false);
@@ -210,6 +215,17 @@ export function PostManager({ initialPosts }: PostManagerProps) {
             </div>
 
             <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">URL de la Imagen de Portada (Opcional)</label>
+              <input
+                type="url"
+                value={coverImage}
+                onChange={(e) => setCoverImage(e.target.value)}
+                placeholder="Ej: https://images.unsplash.com/photo-1579546929518-9e396f3cc809 (o cualquier URL pública de imagen)"
+                className="w-full bg-slate-950 border border-slate-850 border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-hidden focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
+              />
+            </div>
+
+            <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Contenido de la Noticia (Formato HTML)</label>
               <textarea
                 required
@@ -264,10 +280,19 @@ export function PostManager({ initialPosts }: PostManagerProps) {
                 {posts.map((post) => (
                   <tr key={post.id} className="hover:bg-slate-800/10 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-100 line-clamp-1">{post.title}</div>
-                      {post.excerpt && (
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{post.excerpt}</p>
-                      )}
+                      <div className="flex items-center gap-3">
+                        {post.coverImage && (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-800 bg-slate-950">
+                            <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold text-slate-100 line-clamp-1">{post.title}</div>
+                          {post.excerpt && (
+                            <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{post.excerpt}</p>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center gap-1.5 text-xs font-mono text-teal-400 bg-slate-950 px-2 py-1 rounded-lg border border-teal-900/30">

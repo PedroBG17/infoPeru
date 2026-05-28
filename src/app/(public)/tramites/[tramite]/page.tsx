@@ -57,9 +57,9 @@ export default async function Page({ params }: PageProps) {
   if (!tramiteData) notFound();
 
   const breadcrumbs = [
-    { name: 'Inicio', url: 'https://dataperu.pe' },
-    { name: 'Trámites', url: 'https://dataperu.pe/tramites' },
-    { name: tramiteData.title, url: `https://dataperu.pe/tramites/${tramite}` },
+    { name: 'Inicio', url: '/' },
+    { name: 'Trámites', url: '/tramites' },
+    { name: tramiteData.title, url: `/tramites/${tramite}` },
   ];
 
   return (

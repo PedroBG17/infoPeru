@@ -24,9 +24,9 @@ export default async function Page() {
   });
 
   const breadcrumbs = [
-    { name: 'Inicio', url: 'https://dataperu.pe' },
-    { name: 'Directorios', url: 'https://dataperu.pe/directorios' },
-    { name: 'Bolsa de Empleo', url: 'https://dataperu.pe/trabajos' },
+    { name: 'Inicio', url: '/' },
+    { name: 'Directorios', url: '/directorios' },
+    { name: 'Bolsa de Empleo', url: '/trabajos' },
   ];
 
   return (

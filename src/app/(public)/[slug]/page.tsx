@@ -38,7 +38,18 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
-      <article className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 md:p-10 rounded-2xl shadow-xs">
+      <article className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 md:p-10 rounded-2xl shadow-xs overflow-hidden">
+        {/* Imagen de Portada Premium */}
+        {page.coverImage && (
+          <div className="mb-8 overflow-hidden rounded-3xl border border-slate-100 dark:border-slate-850 dark:border-slate-800 shadow-md">
+            <img 
+              src={page.coverImage} 
+              alt={page.title} 
+              className="w-full max-h-[420px] object-cover aspect-video hover:scale-[1.01] transition-transform duration-500"
+            />
+          </div>
+        )}
+
         {/* Encabezado del Artículo */}
         <header className="mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">

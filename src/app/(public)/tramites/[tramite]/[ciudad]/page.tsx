@@ -75,10 +75,10 @@ export default async function Page({ params }: PageProps) {
   const faqRaw = (data.faq as unknown as Array<{ question: string; answer: string }>) || [];
 
   const breadcrumbs = [
-    { name: 'Inicio', url: 'https://dataperu.pe' },
-    { name: 'Trámites', url: 'https://dataperu.pe/tramites' },
-    { name: data.procedimiento.title, url: `https://dataperu.pe/tramites/${data.procedimiento.slug}` },
-    { name: data.ciudad.name, url: `https://dataperu.pe/tramites/${data.procedimiento.slug}/${data.ciudad.slug}` },
+    { name: 'Inicio', url: '/' },
+    { name: 'Trámites', url: '/tramites' },
+    { name: data.procedimiento.title, url: `/tramites/${data.procedimiento.slug}` },
+    { name: data.ciudad.name, url: `/tramites/${data.procedimiento.slug}/${data.ciudad.slug}` },
   ];
 
   return (

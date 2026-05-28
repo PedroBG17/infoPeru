@@ -42,10 +42,10 @@ export default async function Page({ params }: PageProps) {
   const trabajos = getProgrammaticJobs(ciudad);
 
   const breadcrumbs = [
-    { name: 'Inicio', url: 'https://dataperu.pe' },
-    { name: 'Directorios', url: 'https://dataperu.pe/directorios' },
-    { name: 'Bolsa de Empleo', url: 'https://dataperu.pe/trabajos' },
-    { name: ciudadData.name, url: `https://dataperu.pe/trabajos/${ciudad}` },
+    { name: 'Inicio', url: '/' },
+    { name: 'Directorios', url: '/directorios' },
+    { name: 'Bolsa de Empleo', url: '/trabajos' },
+    { name: ciudadData.name, url: `/trabajos/${ciudad}` },
   ];
 
   return (

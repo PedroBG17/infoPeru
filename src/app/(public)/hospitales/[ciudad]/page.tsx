@@ -43,10 +43,10 @@ export default async function Page({ params }: PageProps) {
   const hospitales = await getHospitalesByCiudad(ciudad);
 
   const breadcrumbs = [
-    { name: 'Inicio', url: 'https://dataperu.pe' },
-    { name: 'Directorios', url: 'https://dataperu.pe/directorios' },
-    { name: 'Salud', url: 'https://dataperu.pe/hospitales' },
-    { name: ciudadData.name, url: `https://dataperu.pe/hospitales/${ciudad}` },
+    { name: 'Inicio', url: '/' },
+    { name: 'Directorios', url: '/directorios' },
+    { name: 'Salud', url: '/hospitales' },
+    { name: ciudadData.name, url: `/hospitales/${ciudad}` },
   ];
 
   return (
