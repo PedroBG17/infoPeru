@@ -27,11 +27,6 @@ const nextConfig = {
         destination: '/hospitales',
         permanent: true,
       },
-      {
-        source: '/directorios',
-        destination: '/tramites',
-        permanent: true,
-      },
     ];
   },
 }
