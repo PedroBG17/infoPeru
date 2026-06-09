@@ -1,95 +1,164 @@
 // src/app/layout.tsx
 import '@/styles/globals.css';
 import React from 'react';
+import type { Metadata } from 'next';
 import { Providers } from './providers';
 import { siteConfig } from '@/config/site';
+import { Montserrat, Open_Sans } from 'next/font/google';
+import { HeaderPrincipal } from '@/components/common/header-principal';
+import { getSiteSettings } from '@/lib/site-settings';
+import Link from 'next/link';
 
-export const metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  icons: {
-    icon: '/favicon.ico',
-  },
-};
+const fontSans = Open_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+  weight: ['300', '400', '500', '600', '700', '800'],
+});
 
-export default function RootLayout({
+const fontHeading = Montserrat({
+  subsets: ['latin'],
+  variable: '--font-heading',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800', '900'],
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const siteSettings = await getSiteSettings();
+  const seo = siteSettings.seo;
+  const ogImage = seo.ogImage || siteConfig.ogImage;
+
+  return {
+    title: {
+      default: seo.titleDefault,
+      template: seo.titleTemplate,
+    },
+    description: seo.description,
+    keywords: seo.keywords,
+    authors: [{ name: seo.siteName, url: siteConfig.url }],
+    creator: seo.siteName,
+    metadataBase: new URL(siteConfig.url),
+    alternates: {
+      canonical: '/',
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'es_PE',
+      url: siteConfig.url,
+      title: seo.ogTitle,
+      description: seo.ogDescription,
+      siteName: seo.siteName,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: seo.ogTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: seo.twitterTitle,
+      description: seo.twitterDescription,
+      images: [ogImage],
+    },
+    icons: {
+      icon: '/favicon.ico',
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const siteSettings = await getSiteSettings();
+  const tickerLoop = [...siteSettings.tickerItems, ...siteSettings.tickerItems];
+
   return (
     <html lang="es" className="scroll-smooth">
-      <body className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-900 dark:text-slate-50">
+      <body
+        className={`${fontSans.variable} ${fontHeading.variable} min-h-screen bg-background text-foreground font-sans antialiased transition-colors duration-300`}
+      >
         <Providers>
           <div className="relative flex min-h-screen flex-col">
-            {/* Header / Navbar Premium */}
-            <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
-              <div className="max-w-6xl mx-auto px-4 flex h-16 items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <a href="/" className="flex items-center gap-2">
-                    <span className="bg-primary text-white text-xs font-black px-2.5 py-1 rounded-md tracking-wider">
-                      DATA
-                    </span>
-                    <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">
-                      Perú
-                    </span>
-                  </a>
-                  <nav className="hidden md:flex gap-6">
-                    {siteConfig.mainNav.map((item) => (
-                      <a
-                        key={item.href}
-                        href={item.href}
-                        className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors dark:text-slate-300 dark:hover:text-primary"
-                      >
-                        {item.title}
-                      </a>
-                    ))}
-                  </nav>
-                </div>
-                <div className="flex items-center gap-4">
-                  <a
-                    href="/tramites"
-                    className="inline-flex h-9 items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-primary/95 transition-colors"
-                  >
-                    Buscador de Trámites
-                  </a>
+            
+            {/* Marquesina Roja/Naranja del Portal (Estilo Ticker de Captura) */}
+            <div className="bg-[#B91C1C] text-white text-[11px] font-bold py-2 border-b border-[#991B1B] overflow-hidden select-none">
+              <div className="w-full flex">
+                <div className="animate-marquee flex gap-12 items-center">
+                  {tickerLoop.map((item, index) => (
+                    <span key={`${item}-${index}`}>◆ {item}</span>
+                  ))}
                 </div>
               </div>
-            </header>
+            </div>
 
-            {/* Main Application Area */}
-            <div className="flex-1">{children}</div>
+            {/* Header / Navbar Editorial */}
+            <HeaderPrincipal navigation={siteSettings.navigation} />
 
-            {/* Footer */}
-            <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-8">
+            {/* Area de Contenido */}
+            <main className="flex-1">{children}</main>
+
+            {/* Footer Editorial */}
+            <footer className="bg-[#0B1528] text-white border-t border-slate-800 py-16">
               <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-white mb-3">DataPerú</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Plataforma regional peruana de utilidad pública. Trámites oficiales, directorios de salud, convocatorias laborales y herramientas locales actualizadas.
+                <div className="space-y-4">
+                  <h3 className="font-heading font-black text-white text-lg">
+                    Info<span className="text-[#FF5A1F]">Perú</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed font-light">
+                    {siteSettings.footerDescription}
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-white mb-3">Enlaces Útiles</h4>
-                  <ul className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
-                    <li><a href="/tramites" className="hover:underline">Buscador de Trámites</a></li>
-                    <li><a href="/hospitales" className="hover:underline">Directorio de Salud</a></li>
-                    <li><a href="/trabajos" className="hover:underline">Convocatorias de Empleo</a></li>
+                  <h4 className="font-heading font-bold text-sm text-white mb-4">
+                    Enlaces de Utilidad
+                  </h4>
+                  <ul className="space-y-3 text-xs text-slate-450">
+                    <li>
+                      <Link href="/tramites" className="hover:text-[#FF5A1F] transition-colors">
+                        Guías del TUPA
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/hospitales" className="hover:text-[#FF5A1F] transition-colors">
+                        Directorio de Clínicas e Hospitales
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/trabajos" className="hover:text-[#FF5A1F] transition-colors">
+                        Convocatorias Laborales
+                      </Link>
+                    </li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-white mb-3">Nota Legal</h4>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                    Esta es una plataforma agregadora de información pública. No representamos a ninguna entidad del Estado Peruano. Para realizar trámites oficiales diríjase siempre a Gob.pe.
+                  <h4 className="font-heading font-bold text-sm text-white mb-4">
+                    Seguridad y Descargo Legal
+                  </h4>
+                  <p className="text-[11px] text-slate-400 leading-relaxed font-light">
+                    {siteSettings.footerLegalText}{' '}
+                    <a
+                      href={siteSettings.footerLegalLinkHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline text-[#FF5A1F] hover:text-[#e04f18] font-medium"
+                    >
+                      {siteSettings.footerLegalLinkLabel}
+                    </a>.
                   </p>
                 </div>
               </div>
-              <div className="max-w-6xl mx-auto px-4 border-t border-slate-100 dark:border-slate-900 mt-6 pt-4 text-center">
-                <p className="text-[10px] text-slate-400">
-                  © {new Date().getFullYear()} DataPerú. Todos los derechos reservados.
+              <div className="max-w-6xl mx-auto px-4 border-t border-slate-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                <p className="text-[10px] text-slate-500">
+                  © {new Date().getFullYear()} InfoPerú. Todos los derechos reservados.
+                </p>
+                <p className="text-[10px] text-slate-550 flex items-center gap-1.5 justify-center">
+                  <span>{siteSettings.footerSecurityLabel}</span>
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 </p>
               </div>
             </footer>

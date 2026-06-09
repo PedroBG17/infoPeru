@@ -1,45 +1,48 @@
-// src/app/api/v1/webhooks/revalidate/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidateTag, revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+
+export const dynamic = 'force-dynamic';
 
 /**
- * Endpoint de Webhook seguro para revalidación de caché bajo demanda (On-Demand ISR).
- * Es accionado por webhooks externos provenientes de Headless WordPress (o Supabase) 
- * cuando hay publicaciones actualizadas, eliminando la caché de la tag 'cms-content'.
+ * Webhook seguro para revalidación bajo demanda.
+ * Acepta token por query (?secret=) o Authorization: Bearer <token>.
  */
 export async function POST(request: NextRequest) {
   try {
-    const secret = request.nextUrl.searchParams.get('secret');
+    const querySecret = request.nextUrl.searchParams.get('secret');
+    const authHeader = request.headers.get('authorization');
+    const bearerSecret = authHeader?.startsWith('Bearer ') ? authHeader.slice('Bearer '.length).trim() : null;
+    const providedSecret = bearerSecret || querySecret;
     const expectedSecret = process.env.REVALIDATION_SECRET;
 
-    // Validación de seguridad para prevenir llamadas no autorizadas
-    if (expectedSecret && secret !== expectedSecret) {
+    if (!expectedSecret) {
+      return NextResponse.json({ message: 'REVALIDATION_SECRET no configurado.' }, { status: 503 });
+    }
+
+    if (providedSecret !== expectedSecret) {
       return NextResponse.json({ message: 'Token de revalidación inválido.' }, { status: 401 });
     }
 
     const body = await request.json().catch(() => ({}));
-    const tagToRevalidate = body.tag || 'cms-content';
-    const pathToRevalidate = body.path;
+    const tagToRevalidate = typeof body.tag === 'string' && body.tag.trim() ? body.tag.trim() : 'cms-content';
+    const pathToRevalidate = typeof body.path === 'string' && body.path.startsWith('/') ? body.path : null;
 
     if (pathToRevalidate) {
-      // Revalidar una ruta específica (ej: /guia-afiliacion-sis)
       revalidatePath(pathToRevalidate);
-      console.log(`[REVALIDATION] Ruta purgada con éxito: ${pathToRevalidate}`);
+      console.log(`[REVALIDATION] Ruta purgada: ${pathToRevalidate}`);
     } else {
-      // Revalidar una etiqueta de caché global
       revalidateTag(tagToRevalidate);
-      console.log(`[REVALIDATION] Tag purgada con éxito: ${tagToRevalidate}`);
+      console.log(`[REVALIDATION] Tag purgada: ${tagToRevalidate}`);
     }
 
-    return NextResponse.json({ 
-      revalidated: true, 
+    return NextResponse.json({
+      revalidated: true,
       tag: pathToRevalidate ? null : tagToRevalidate,
-      path: pathToRevalidate || null,
-      timestamp: Date.now() 
+      path: pathToRevalidate,
+      timestamp: Date.now(),
     });
   } catch (error) {
-    console.error('Error during cache revalidation webhook:', error);
+    console.error('[REVALIDATION_WEBHOOK_ERROR]', error);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
-export const dynamic = 'force-dynamic';

@@ -4,10 +4,13 @@ import { getMetadata } from '@/lib/seo';
 import { getHospitalesByCiudad, getCiudadWithDepartamento } from '@/modules/salud/services';
 import { StructuredData } from '@/components/common/structured-data';
 import { LinkAutomatico } from '@/components/common/link-automatico';
-import { prisma } from '@/lib/db';
-import { Phone, MapPin, Clock, Hospital as HospitalIcon, Shield, Search } from 'lucide-react';
+import { SourceList } from '@/components/common/source-list';
+import { editorialImages, pageSources } from '@/lib/editorial-sources';
+import { Clock, Shield } from 'lucide-react';
 
 export const revalidate = 86400; // ISR: Regenerar cada 24 horas
+
+import { HospitalesList } from '@/components/salud/hospitales-list';
 
 interface PageProps {
   params: Promise<{
@@ -15,10 +18,10 @@ interface PageProps {
   }>;
 }
 
-// Pre-compilar las top ciudades en el build para maximizar LCP
+// No pre-renderizar en build (las páginas se generan on-demand vía ISR)
+// Evita fallos cuando la BD no está disponible durante `next build`
 export async function generateStaticParams() {
-  const topCiudades = ['lima', 'arequipa', 'trujillo'];
-  return topCiudades.map((c) => ({ ciudad: c }));
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -63,7 +66,7 @@ export default async function Page({ params }: PageProps) {
           streetAddress: h.direccion,
           city: ciudadData.name,
           region: ciudadData.departamento.name,
-          image: 'https://images.unsplash.com/photo-1586773860418-d3b3de97e663?auto=format&fit=crop&q=80&w=800',
+          image: editorialImages.salud.src,
           url: `https://dataperu.pe/hospitales/${ciudad}`,
         };
         return <StructuredData key={h.id} type="LocalBusiness" data={businessData} />;
@@ -122,103 +125,38 @@ export default async function Page({ params }: PageProps) {
                 </div>
               </div>
 
-              {hospitales.length === 0 ? (
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-sm">
-                  <HospitalIcon className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold">No se encontraron centros de salud</h3>
-                  <p className="text-slate-500 dark:text-slate-400 mt-2">
-                    Actualmente estamos ampliando nuestro catálogo para esta región.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-6">
-                  {hospitales.map((h) => {
-                    const isEsSalud = h.tipo.toUpperCase() === 'ESSALUD';
-                    const isMinsa = h.tipo.toUpperCase() === 'MINSA';
-                    
-                    return (
-                      <article
-                        key={h.id}
-                        className="group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 hover:border-teal-500/50 dark:hover:border-teal-500/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
-                      >
-                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-2">
-                              <span
-                                className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                  isEsSalud
-                                    ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/30'
-                                    : isMinsa
-                                    ? 'bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border border-teal-200/30'
-                                    : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200/30'
-                                }`}
-                              >
-                                {h.tipo}
-                              </span>
-                              {h.horario24h && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/20">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  Atención 24h Emergency
-                                </span>
-                              )}
-                            </div>
-
-                            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                              {h.nombre}
-                            </h3>
-
-                            <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                              <div className="flex items-start space-x-2">
-                                <MapPin className="w-4 h-4 mt-0.5 text-slate-400 shrink-0" />
-                                <span>{h.direccion}</span>
-                              </div>
-                              {h.telefono && (
-                                <div className="flex items-center space-x-2">
-                                  <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                                  <span>{h.telefono}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-2 shrink-0 w-full md:w-auto">
-                            {h.telefono && (
-                              <a
-                                href={`tel:${h.telefono.replace(/\s+/g, '')}`}
-                                className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-600 shadow-sm transition-all text-center"
-                              >
-                                <Phone className="w-4 h-4 mr-2" />
-                                Llamar de Emergencia
-                              </a>
-                            )}
-                            <a
-                              href={`https://maps.google.com/?q=${encodeURIComponent(h.nombre + ' ' + h.direccion)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-all text-center"
-                            >
-                              <MapPin className="w-4 h-4 mr-2" />
-                              Ver Mapa de Ruta
-                            </a>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              )}
+              <HospitalesList initialHospitales={hospitales} ciudadNombre={ciudadData.name} />
 
               {/* Informative block of the health system to avoid SEO thin content */}
-              <section className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 md:p-8 space-y-4 shadow-sm">
+              <section className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 md:p-8 space-y-5 shadow-sm">
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
                   ¿Cómo funciona el Sistema de Salud en {ciudadData.name}?
                 </h2>
-                <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 text-sm leading-relaxed space-y-4">
+                <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 text-sm leading-relaxed space-y-4 font-light">
                   <p>
                     En la región de <strong>{ciudadData.name}</strong>, el sistema de salud pública está principalmente dividido en dos subsistemas principales: el Seguro Integral de Salud (<strong>SIS</strong>) gestionado por el Ministerio de Salud (<strong>MINSA</strong>) y el Seguro Social de Salud (<strong>EsSalud</strong>) para trabajadores formales cotizantes.
                   </p>
                   <p>
                     Para emergencias extremas de salud, todos los hospitales con unidades de cuidados intensivos y choque de esta lista están en la obligación legal de atender a cualquier paciente en peligro de muerte inminente según la <strong>Ley de Emergencia Médica Nº 27604</strong> de la República del Perú, sin importar su tipo de afiliación o seguro.
+                  </p>
+                  <p>
+                    Si no cuentas con seguro, revisa primero tu afiliación al SIS Gratuito y la cobertura vigente. Para orientación sanitaria, MINSA mantiene la Línea 113; ante síntomas compatibles con dengue y signos de alarma como dolor abdominal intenso, vómitos persistentes o sangrado, acude a un establecimiento de salud.
+                  </p>
+                  <p>
+                    Para salud mental, inicia la atención en el establecimiento de salud más cercano. El personal puede evaluar el caso y derivar a un Centro de Salud Mental Comunitaria cuando sea necesario.
+                  </p>
+                </div>
+
+                {/* Copyright disclaimer */}
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-450 dark:text-slate-500 leading-relaxed font-light space-y-1">
+                  <p>
+                    <strong>Aviso de Copyright y Fuente de Datos:</strong>
+                  </p>
+                  <p>
+                    Este directorio médico regional utiliza como referencia información de interés público recopilada de los portales de Datos Abiertos del Gobierno Peruano, el Ministerio de Salud (MINSA), la Superintendencia Nacional de Salud (SUSALUD) y Google Maps.
+                  </p>
+                  <p>
+                    Los nombres de instituciones, marcas y logotipos de EsSalud, SIS, MINSA y clínicas particulares son propiedad registrada de sus respectivos dueños. Este portal recopila y organiza esta información únicamente con fines informativos y de orientación ciudadana, sin fines de suplantación ni atribución de derechos de propiedad intelectual.
                   </p>
                 </div>
               </section>
@@ -299,6 +237,11 @@ export default async function Page({ params }: PageProps) {
                 </h3>
                 <LinkAutomatico type="tramites" ciudadSlug={ciudadData.slug} />
               </div>
+              <SourceList
+                title="Fuentes oficiales de salud"
+                sources={pageSources.salud}
+                image={editorialImages.salud}
+              />
             </aside>
           </div>
         </main>

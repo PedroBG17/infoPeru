@@ -5,6 +5,9 @@ import { prisma } from '@/lib/db';
 import { StructuredData } from '@/components/common/structured-data';
 import { LinkAutomatico } from '@/components/common/link-automatico';
 import { SimuladorExamen } from '@/modules/tramites/components/simulador-examen';
+import { SourceList } from '@/components/common/source-list';
+import { pageSources, procedureSources } from '@/lib/editorial-sources';
+import Link from 'next/link';
 
 
 
@@ -17,18 +20,9 @@ interface PageProps {
   }>;
 }
 
-// Pre-compilación estática de combinaciones de alto volumen
+// No pre-renderizar en build (las páginas se generan on-demand vía ISR)
 export async function generateStaticParams() {
-  const topCiudades = ['lima', 'arequipa', 'trujillo', 'chiclayo', 'piura'];
-  const topTramites = ['licencia-de-conducir', 'dni-duplicado', 'antecedentes-penales'];
-
-  const paths = [];
-  for (const t of topTramites) {
-    for (const c of topCiudades) {
-      paths.push({ tramite: t, ciudad: c });
-    }
-  }
-  return paths;
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -80,6 +74,7 @@ export default async function Page({ params }: PageProps) {
     { name: data.procedimiento.title, url: `/tramites/${data.procedimiento.slug}` },
     { name: data.ciudad.name, url: `/tramites/${data.procedimiento.slug}/${data.ciudad.slug}` },
   ];
+  const sources = procedureSources[data.procedimiento.slug] ?? pageSources.tramites;
 
   return (
     <>
@@ -92,9 +87,9 @@ export default async function Page({ params }: PageProps) {
           {breadcrumbs.map((b, i) => (
             <span key={b.url} className="flex items-center gap-2">
               {i > 0 && <span className="text-slate-400">/</span>}
-              <a href={b.url} className="hover:text-primary transition-colors">
+              <Link href={b.url} className="hover:text-primary transition-colors">
                 {b.name}
-              </a>
+              </Link>
             </span>
           ))}
         </nav>
@@ -154,6 +149,21 @@ export default async function Page({ params }: PageProps) {
               </div>
             </section>
 
+            <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm space-y-4">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Verificación antes de pagar</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-600 dark:text-slate-300">
+                <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-4">
+                  Confirma el código o concepto de pago en el portal oficial.
+                </div>
+                <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-4">
+                  Revisa si la cita es obligatoria para la sede de {data.ciudad.name}.
+                </div>
+                <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-4">
+                  Conserva constancias y número de solicitud hasta finalizar el trámite.
+                </div>
+              </div>
+            </section>
+
             {/* Simulador Interactivo Exclusivo para Licencia de Conducir (Brevete) */}
             {data.procedimiento.slug === 'licencia-de-conducir' && (
               <section className="space-y-4">
@@ -168,7 +178,6 @@ export default async function Page({ params }: PageProps) {
             {/* Enlazado Interno Inteligente */}
             <section className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-2xl">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Otros trámites útiles en {data.ciudad.name}</h3>
-              {/* @ts-ignore */}
               <LinkAutomatico type="tramites" ciudadSlug={data.ciudad.slug} excludeSlug={data.procedimiento.slug} />
             </section>
           </div>
@@ -201,6 +210,10 @@ export default async function Page({ params }: PageProps) {
                 )}
               </div>
             </div>
+            <SourceList
+              title="Fuente oficial consultada"
+              sources={sources}
+            />
           </div>
         </div>
       </main>

@@ -38,7 +38,7 @@ async function main() {
   const arequipa = await prisma.ciudad.create({
     data: { name: 'Arequipa', slug: 'arequipa', departamentoId: depArequipa.id },
   });
-  const trujillo = await prisma.ciudad.create({
+  await prisma.ciudad.create({
     data: { name: 'Trujillo', slug: 'trujillo', departamentoId: depLaLibertad.id },
   });
 

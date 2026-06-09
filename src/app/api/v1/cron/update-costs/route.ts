@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Endpoint de Cron Worker para actualizar costos TUPA oficialmente.
  * Ejecutado periódicamente (ej. vía Vercel Crons o GitHub Actions).
@@ -12,7 +14,14 @@ export async function GET(request: Request) {
   try {
     // 1. Verificación de Seguridad vía Token Secreto en Cabeceras
     const authHeader = request.headers.get('Authorization');
-    const cronSecret = process.env.CRON_SECRET || 'dataperu_internal_cron_token_2026';
+    const cronSecret = process.env.CRON_SECRET;
+
+    if (!cronSecret) {
+      return NextResponse.json(
+        { error: 'CRON_SECRET no configurado.' },
+        { status: 503 }
+      );
+    }
 
     if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(

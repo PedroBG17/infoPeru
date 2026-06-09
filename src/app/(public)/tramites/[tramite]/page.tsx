@@ -2,6 +2,8 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
+import { SourceList } from '@/components/common/source-list';
+import { pageSources, procedureSources } from '@/lib/editorial-sources';
 import { FileText, MapPin, ChevronRight, Check } from 'lucide-react';
 
 export const revalidate = 86400; // ISR: 24 horas
@@ -13,11 +15,18 @@ interface PageProps {
 }
 
 // Pre-generar los slugs de trámites conocidos para el build
+// Wrapped in try/catch: si la BD no está disponible en build-time,
+// devuelve [] y las páginas se generan on-demand vía ISR.
 export async function generateStaticParams() {
-  const tramites = await prisma.procedimiento.findMany({
-    select: { slug: true },
-  });
-  return tramites.map((t) => ({ tramite: t.slug }));
+  try {
+    const tramites = await prisma.procedimiento.findMany({
+      select: { slug: true },
+    });
+    return tramites.map((t) => ({ tramite: t.slug }));
+  } catch (error) {
+    console.warn('[generateStaticParams] DB no disponible en build-time, fallback a ISR dinámico:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -61,6 +70,7 @@ export default async function Page({ params }: PageProps) {
     { name: 'Trámites', url: '/tramites' },
     { name: tramiteData.title, url: `/tramites/${tramite}` },
   ];
+  const sources = procedureSources[tramiteData.slug] ?? pageSources.tramites;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-50">
@@ -112,6 +122,20 @@ export default async function Page({ params }: PageProps) {
                 ))}
               </ul>
             </section>
+
+            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-4">
+              <h2 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100">
+                Antes de iniciar este trámite
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                <div className="rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 p-4">
+                  Revisa si el pago se hace con código de tasa, plataforma oficial o entidad bancaria autorizada. Evita depositar a cuentas personales o aceptar intermediarios.
+                </div>
+                <div className="rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 p-4">
+                  Guarda la constancia de pago, la cita y el número de solicitud. Esos datos suelen ser necesarios para consultar estado, reprogramar o recoger documentos.
+                </div>
+              </div>
+            </section>
           </div>
 
           {/* Sidebar - Choose City */}
@@ -145,6 +169,10 @@ export default async function Page({ params }: PageProps) {
                 ))}
               </ul>
             </div>
+            <SourceList
+              title="Fuente principal del trámite"
+              sources={sources}
+            />
           </aside>
         </div>
       </main>

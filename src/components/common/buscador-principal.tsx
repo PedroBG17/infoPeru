@@ -42,6 +42,41 @@ const SEARCH_DATABASE: SearchItem[] = [
     keywords: ['brevete', 'licencia', 'conducir', 'mtc', 'arequipa', 'paucarpata'],
     location: 'Arequipa',
   },
+  {
+    title: 'Pasaporte Electrónico',
+    category: 'Trámite',
+    url: '/tramites/pasaporte-electronico/lima',
+    keywords: ['pasaporte', 'migraciones', 'viaje', 'cita', 'tasa', 'lima'],
+    location: 'Lima Metropolitana',
+  },
+  {
+    title: 'Inscripción al RUC Persona Natural',
+    category: 'Trámite',
+    url: '/tramites/inscripcion-ruc-persona-natural/lima',
+    keywords: ['ruc', 'sunat', 'negocio', 'persona natural', 'impuestos', 'formalizacion', 'lima'],
+    location: 'Lima Metropolitana',
+  },
+  {
+    title: 'Afiliación al SIS Gratuito',
+    category: 'Trámite',
+    url: '/tramites/afiliacion-sis-gratuito/lima',
+    keywords: ['sis', 'seguro', 'salud', 'afiliacion', 'gratuito', 'minsa', 'lima'],
+    location: 'Lima Metropolitana',
+  },
+  {
+    title: 'Certificado Literal SUNARP',
+    category: 'Trámite',
+    url: '/tramites/certificado-literal-sunarp/lima',
+    keywords: ['sunarp', 'certificado literal', 'partida registral', 'propiedad', 'predio', 'lima'],
+    location: 'Lima Metropolitana',
+  },
+  {
+    title: 'Certificado Único Laboral',
+    category: 'Trámite',
+    url: '/tramites/certificado-unico-laboral/lima',
+    keywords: ['certificado unico laboral', 'cul', 'mtpe', 'empleos peru', 'cv', 'trabajo', 'lima'],
+    location: 'Lima Metropolitana',
+  },
   // Hospitales / Salud
   {
     title: 'Hospitales y Clínicas',

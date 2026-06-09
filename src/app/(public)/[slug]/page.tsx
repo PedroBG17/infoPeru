@@ -1,14 +1,21 @@
-// src/app/(public)/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import { getWordPressPageBySlug } from '@/lib/wordpress';
 import { getMetadata } from '@/lib/seo';
+import { safeSanitizeHtml } from '@/utils/security';
+import { StructuredData } from '@/components/common/structured-data';
+import { ArrowLeft, Clock, Eye } from 'lucide-react';
+import Link from 'next/link';
 
-export const revalidate = 86400; // ISR: Revalidar cada 24 horas
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{
     slug: string;
   }>;
+}
+
+function toPlainText(html: string) {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -17,16 +24,15 @@ export async function generateMetadata({ params }: PageProps) {
 
   if (!page) return {};
 
-  // Remover HTML para la descripción corta del SEO
-  const textDescription = page.content
-    .replace(/<[^>]*>/g, '')
-    .substring(0, 155) + '...';
+  const seoTitle = page.metaTitle || page.title;
+  const seoDescription = page.metaDescription || `${toPlainText(page.content).substring(0, 155)}...`;
 
   return getMetadata({
-    title: page.title,
-    description: textDescription,
+    title: seoTitle,
+    description: seoDescription,
     slug: `/${slug}`,
     ogType: 'article',
+    ogImage: page.coverImage || undefined,
   });
 }
 
@@ -36,57 +42,134 @@ export default async function Page({ params }: PageProps) {
 
   if (!page) notFound();
 
+  const sanitizedContent = safeSanitizeHtml(page.content);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dataperu.pe';
+  const articleUrl = `${siteUrl}/${slug}`;
+  const description = page.metaDescription || toPlainText(page.content).substring(0, 155);
+
   return (
-    <main className="max-w-4xl mx-auto px-4 py-12">
-      <article className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 md:p-10 rounded-2xl shadow-xs overflow-hidden">
-        {/* Imagen de Portada Premium */}
-        {page.coverImage && (
-          <div className="mb-8 overflow-hidden rounded-3xl border border-slate-100 dark:border-slate-850 dark:border-slate-800 shadow-md">
-            <img 
-              src={page.coverImage} 
-              alt={page.title} 
-              className="w-full max-h-[420px] object-cover aspect-video hover:scale-[1.01] transition-transform duration-500"
-            />
-          </div>
-        )}
+    <main className="bg-slate-50 dark:bg-slate-950">
+      <StructuredData
+        type="Breadcrumb"
+        data={[
+          { name: 'Inicio', url: siteUrl },
+          { name: 'Noticias', url: `${siteUrl}/noticias` },
+          { name: page.title, url: articleUrl },
+        ]}
+      />
+      <StructuredData
+        type="Article"
+        data={{
+          headline: page.metaTitle || page.title,
+          description,
+          image: page.coverImage || null,
+          authorName: page.authorName,
+          datePublished: page.date,
+          url: articleUrl,
+        }}
+      />
 
-        {/* Encabezado del Artículo */}
-        <header className="mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-            {page.title}
-          </h1>
-          <div className="mt-4 flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-            <span>Por <strong className="text-slate-700 dark:text-slate-300">{page.authorName}</strong></span>
-            <span>•</span>
-            <span>Publicado el {new Date(page.date).toLocaleDateString('es-PE', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            })}</span>
-          </div>
-        </header>
+      <article className="mx-auto max-w-4xl px-4 py-10 md:py-14">
+        <Link
+          href="/noticias"
+          className="mb-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver a noticias
+        </Link>
 
-        {/* Contenido HTML Inyectado y Estilizado con Prose */}
-        <div 
-          className="prose dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary hover:prose-a:underline prose-img:rounded-xl"
-          dangerouslySetInnerHTML={{ __html: page.content }}
-        />
+        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 md:p-10">
+          {page.category && (
+            <div className="mb-4">
+              <span className="inline-flex items-center rounded-md border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+                {page.category.name}
+              </span>
+            </div>
+          )}
+
+          {page.coverImage && (
+            <div className="mb-8 overflow-hidden rounded-lg border border-slate-100 shadow-sm dark:border-slate-800">
+              <img
+                src={page.coverImage}
+                alt={page.title}
+                className="aspect-video max-h-[420px] w-full object-cover transition-transform duration-500 hover:scale-[1.01]"
+              />
+            </div>
+          )}
+
+          <header className="mb-8 border-b border-slate-100 pb-6 dark:border-slate-800">
+            <h1 className="font-heading text-3xl font-black leading-tight tracking-tight text-slate-900 dark:text-white md:text-5xl">
+              {page.title}
+            </h1>
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+              <span>
+                Por <strong className="text-slate-700 dark:text-slate-300">{page.authorName}</strong>
+              </span>
+              <span aria-hidden="true">-</span>
+              <span>
+                {new Date(page.date).toLocaleDateString('es-PE', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </span>
+              <span aria-hidden="true">-</span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5 text-slate-400" />
+                {page.readingTime || 1} {(page.readingTime || 1) === 1 ? 'min' : 'mins'} de lectura
+              </span>
+              {page.viewCount !== undefined && (
+                <>
+                  <span aria-hidden="true">-</span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3.5 w-3.5 text-slate-400" />
+                    {page.viewCount} visitas
+                  </span>
+                </>
+              )}
+            </div>
+          </header>
+
+          <div
+            className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-bold prose-p:leading-8 prose-a:text-primary hover:prose-a:underline prose-img:rounded-lg dark:prose-invert"
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+          />
+
+          {page.tags && page.tags.length > 0 && (
+            <div className="mt-8 border-t border-slate-100 pt-6 dark:border-slate-800">
+              <span className="mb-3 block text-xs font-bold uppercase tracking-wider text-slate-500">
+                Etiquetas relacionadas
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {page.tags.map((tag) => (
+                  <span
+                    key={tag.slug}
+                    className="inline-flex items-center rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    #{tag.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </article>
 
-      {/* Caja de Utilidad Pública */}
-      <section className="mt-8 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <h4 className="font-bold text-slate-950 dark:text-white">¿Te resultó de utilidad este artículo?</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            DataPerú compila información oficial del Estado de forma simplificada y gratuita.
-          </p>
+      <section className="mx-auto max-w-4xl px-4 pb-14">
+        <div className="flex flex-col items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 md:flex-row">
+          <div>
+            <h4 className="font-bold text-slate-950 dark:text-white">¿Te resultó útil este artículo?</h4>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              DataPerú compila información pública y guías oficiales de forma simple y gratuita.
+            </p>
+          </div>
+          <Link
+            href="/tramites"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-primary/95"
+          >
+            Consultar guías oficiales
+          </Link>
         </div>
-        <a 
-          href="/tramites" 
-          className="inline-flex h-9 items-center justify-center rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-primary/95 transition-all whitespace-nowrap"
-        >
-          Consultar Guías Oficiales
-        </a>
       </section>
     </main>
   );

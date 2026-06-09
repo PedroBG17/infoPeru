@@ -1,10 +1,14 @@
 import React from 'react';
 import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
+import { getSiteSettings } from '@/lib/site-settings';
+import { requireAdminSession } from '@/lib/admin-auth';
 import { PostManager } from './post-manager';
+import { SiteManager } from './site-manager';
+import type { Prisma } from '@prisma/client';
+import Link from 'next/link';
 import { 
   Users, 
-  BarChart3, 
   ShieldAlert, 
   FileSpreadsheet, 
   TrendingUp, 
@@ -23,6 +27,21 @@ interface PageProps {
   }>;
 }
 
+type JobListingWithCity = Prisma.JobListingGetPayload<{
+  include: {
+    city: {
+      select: {
+        id: true;
+        name: true;
+        slug: true;
+        departamento: {
+          select: { name: true };
+        };
+      };
+    };
+  };
+}>;
+
 export async function generateMetadata() {
   return getMetadata({
     title: 'Panel de Administración - Leads y Noticias',
@@ -33,9 +52,11 @@ export async function generateMetadata() {
 }
 
 export default async function AdminDashboardPage({ searchParams }: PageProps) {
+  const adminSession = await requireAdminSession();
   const resolvedSearchParams = await searchParams;
   const activeTab = resolvedSearchParams.tab || 'leads';
   const isNoticiasTab = activeTab === 'noticias';
+  const isPortalTab = activeTab === 'portal';
 
   // 1. Obtener métricas generales
   const totalLeads = await prisma.lead.count();
@@ -49,6 +70,9 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
 
   const totalLogs = await prisma.analyticsLog.count();
   const totalPosts = await prisma.post.count();
+  const totalProcedimientos = await prisma.procedimiento.count();
+  const totalHospitales = await prisma.hospital.count();
+  const siteSettings = await getSiteSettings();
 
   // 2. Obtener leads agrupados por sector para métricas de negocio
   const leadsBySector = await prisma.lead.groupBy({
@@ -81,10 +105,157 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
     take: 8
   });
 
-  // 5. Obtener todos los artículos/noticias para la pestaña de noticias
-  const posts = await prisma.post.findMany({
+  // 5. Obtener taxonomías y medios
+  const categories = await prisma.category.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      _count: {
+        select: { posts: true }
+      }
+    }
+  });
+
+  const tags = await prisma.tag.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      _count: {
+        select: { posts: true }
+      }
+    }
+  });
+
+  const mediaFiles = await prisma.media.findMany({
     orderBy: { createdAt: 'desc' }
   });
+
+  // 6. Obtener todos los artículos/noticias para la pestaña de noticias
+  const posts = await prisma.post.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      category: {
+        select: { id: true, name: true }
+      },
+      tags: {
+        select: { id: true, name: true }
+      }
+    }
+  });
+
+  // 7. Datos estructurales del portal para CMS global
+  const departamentos = await prisma.departamento.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      _count: {
+        select: { ciudades: true },
+      },
+    },
+  });
+
+  const ciudades = await prisma.ciudad.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      departamento: {
+        select: { id: true, name: true },
+      },
+      _count: {
+        select: {
+          procedimientos: true,
+          hospitales: true,
+          leads: true,
+        },
+      },
+    },
+  });
+
+  const procedimientos = await prisma.procedimiento.findMany({
+    orderBy: { title: 'asc' },
+    include: {
+      seoConfig: true,
+      _count: {
+        select: { ciudadesRel: true },
+      },
+    },
+  });
+
+  const relaciones = await prisma.procedimientoCiudad.findMany({
+    orderBy: { updatedAt: 'desc' },
+    include: {
+      procedimiento: {
+        select: { id: true, title: true, slug: true },
+      },
+      ciudad: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          departamento: {
+            select: { name: true },
+          },
+        },
+      },
+      sedes: {
+        select: { id: true },
+      },
+    },
+  });
+
+  const sedes = await prisma.sedeOficina.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      ciudad: {
+        select: { id: true, name: true, slug: true },
+      },
+      procedimientoCiudad: {
+        select: {
+          id: true,
+          procedimiento: {
+            select: { title: true, slug: true },
+          },
+          ciudad: {
+            select: { name: true, slug: true },
+          },
+        },
+      },
+    },
+  });
+
+  const hospitales = await prisma.hospital.findMany({
+    orderBy: { nombre: 'asc' },
+    include: {
+      ciudad: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          departamento: {
+            select: { name: true },
+          },
+        },
+      },
+    },
+  });
+
+  let jobListings: JobListingWithCity[] = [];
+  try {
+    jobListings = await prisma.jobListing.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        city: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            departamento: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.warn('[ADMIN_JOB_LISTINGS_WARNING] Tabla de vacantes no disponible todavía:', error);
+  }
+
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
@@ -103,8 +274,16 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
           
           <div className="flex items-center space-x-4">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-950/60 text-teal-400 border border-teal-800/40">
-              Conexión Directa SQL
+              {adminSession.email}
             </span>
+            <form action="/admin/logout" method="post">
+              <button
+                type="submit"
+                className="rounded-xl border border-slate-800 px-3 py-1.5 text-xs font-bold text-slate-400 transition hover:border-rose-800/50 hover:bg-rose-950/30 hover:text-rose-300"
+              >
+                Salir
+              </button>
+            </form>
           </div>
         </div>
       </header>
@@ -157,9 +336,11 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
           {/* Card 4: Auditoría Logs */}
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-xs">
             <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Logs Auditoría</span>
-              <span className="text-3xl font-extrabold mt-2 block">{totalLogs}</span>
-              <span className="text-[10px] text-slate-500 mt-1 block">Peticiones Edge registradas</span>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Biblioteca & Taxón.</span>
+              <span className="text-3xl font-extrabold mt-2 block text-amber-400">
+                {totalProcedimientos} <span className="text-xs text-slate-500 font-normal">trám.</span> / {totalHospitales} <span className="text-xs text-slate-500 font-normal">salud</span>
+              </span>
+              <span className="text-[10px] text-slate-500 mt-1 block">{totalLogs} eventos de auditorÃ­a registrados</span>
             </div>
             <div className="w-12 h-12 bg-slate-800 text-amber-400 rounded-xl flex items-center justify-center">
               <ShieldAlert className="w-6 h-6" />
@@ -169,23 +350,49 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
 
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-900 gap-6">
-          <a 
+          <Link 
             href="/admin/dashboard?tab=leads" 
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${!isNoticiasTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${!isNoticiasTab && !isPortalTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Leads y Auditoría
-          </a>
-          <a 
+          </Link>
+          <Link 
             href="/admin/dashboard?tab=noticias" 
             className={`pb-4 text-sm font-bold border-b-2 transition-all ${isNoticiasTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Gestión de Noticias
-          </a>
+          </Link>
+          <Link 
+            href="/admin/dashboard?tab=portal" 
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${isPortalTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+          >
+            Gestión del Portal
+          </Link>
         </div>
 
         {/* Tab Contents */}
         {isNoticiasTab ? (
-          <PostManager initialPosts={posts} />
+          <PostManager initialPosts={posts} categories={categories} tags={tags} mediaFiles={mediaFiles} />
+        ) : isPortalTab ? (
+          <SiteManager
+            departamentos={departamentos}
+            ciudades={ciudades}
+            procedimientos={procedimientos}
+            relaciones={relaciones}
+            sedes={sedes}
+            hospitales={hospitales}
+            posts={posts.map((post) => ({
+              id: post.id,
+              title: post.title,
+              slug: post.slug,
+              published: post.published,
+              metaTitle: post.metaTitle,
+              metaDescription: post.metaDescription,
+              coverImage: post.coverImage,
+            }))}
+            jobListings={jobListings}
+            siteSettings={siteSettings}
+          />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-200">
             {/* Main Panel: Leads list */}

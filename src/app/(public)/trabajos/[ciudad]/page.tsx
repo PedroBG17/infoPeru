@@ -1,9 +1,11 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { getMetadata } from '@/lib/seo';
-import { getCiudadBySlug, getProgrammaticJobs, SECTORES } from '@/modules/empleo/services';
+import { getCiudadBySlug, getJobsByCiudad, SECTORES } from '@/modules/empleo/services';
 import { StructuredData } from '@/components/common/structured-data';
 import { LinkAutomatico } from '@/components/common/link-automatico';
+import { SourceList } from '@/components/common/source-list';
+import { editorialImages, pageSources } from '@/lib/editorial-sources';
 import { Briefcase, MapPin, Calendar, DollarSign, Building, ArrowRight, UserPlus, CheckCircle } from 'lucide-react';
 
 export const revalidate = 86400; // ISR: Regenerar cada 24 horas
@@ -14,10 +16,9 @@ interface PageProps {
   }>;
 }
 
-// Pre-compilar las top ciudades en el build para maximizar LCP
+// No pre-renderizar en build (las páginas se generan on-demand vía ISR)
 export async function generateStaticParams() {
-  const topCiudades = ['lima', 'arequipa', 'trujillo'];
-  return topCiudades.map((c) => ({ ciudad: c }));
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -39,7 +40,7 @@ export default async function Page({ params }: PageProps) {
 
   if (!ciudadData) notFound();
 
-  const trabajos = getProgrammaticJobs(ciudad);
+  const trabajos = await getJobsByCiudad(ciudad);
 
   const breadcrumbs = [
     { name: 'Inicio', url: '/' },
@@ -209,6 +210,9 @@ export default async function Page({ params }: PageProps) {
                   <p>
                     <strong>Nota de Seguridad:</strong> Todos los procesos de selección mostrados en DataPerú son 100% gratuitos para el postulante. Nunca realices ningún tipo de pago por concepto de evaluaciones médicas, capacitaciones de ingreso o trámites administrativos a empresas reclutadoras.
                   </p>
+                  <p>
+                    Antes de postular, prepara tu Certificado Único Laboral y mantén actualizado tu CV en Empleos Perú. Estos servicios son gratuitos y ayudan a validar datos de identidad, antecedentes, formación y experiencia formal frente a empleadores.
+                  </p>
                 </div>
               </section>
             </div>
@@ -306,6 +310,11 @@ export default async function Page({ params }: PageProps) {
                 </h3>
                 <LinkAutomatico type="tramites" ciudadSlug={ciudadData.slug} />
               </div>
+              <SourceList
+                title="Fuentes oficiales de empleo"
+                sources={pageSources.empleo}
+                image={editorialImages.empleo}
+              />
             </aside>
           </div>
         </main>

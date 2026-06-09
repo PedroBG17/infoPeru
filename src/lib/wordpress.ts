@@ -7,6 +7,12 @@ interface WordPressPage {
   date: string;
   authorName: string;
   coverImage?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  readingTime?: number | null;
+  viewCount?: number;
+  category?: { name: string; slug: string } | null;
+  tags?: { name: string; slug: string }[];
 }
 
 /**
@@ -21,15 +27,35 @@ export async function getWordPressPageBySlug(slug: string): Promise<WordPressPag
         slug: slug,
         published: true,
       },
+      include: {
+        category: {
+          select: { name: true, slug: true }
+        },
+        tags: {
+          select: { name: true, slug: true }
+        }
+      }
     });
 
     if (post) {
+      // Incrementar el contador de visitas asíncronamente en segundo plano
+      prisma.post.update({
+        where: { id: post.id },
+        data: { viewCount: { increment: 1 } }
+      }).catch(err => console.warn(`[SUPABASE_CMS] Falló incremento de visitas para "${slug}":`, err));
+
       return {
         title: post.title,
         content: post.content,
         date: post.createdAt.toISOString(),
         authorName: post.author,
         coverImage: post.coverImage,
+        metaTitle: post.metaTitle,
+        metaDescription: post.metaDescription,
+        readingTime: post.readingTime,
+        viewCount: post.viewCount + 1,
+        category: post.category,
+        tags: post.tags,
       };
     }
   } catch (error) {

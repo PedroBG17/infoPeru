@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { rateLimit } from '@/lib/rate-limiter';
 import { createClient as createSupabaseClient } from '@/utils/supabase/middleware';
+import { ADMIN_SESSION_COOKIE } from '@/lib/admin-auth-constants';
 
 export async function middleware(request: NextRequest) {
   const ip = request.headers.get('cf-connecting-ip') || 
@@ -10,6 +11,27 @@ export async function middleware(request: NextRequest) {
              request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
              '127.0.0.1';
   const path = request.nextUrl.pathname;
+
+  const hasAdminSessionCookie = Boolean(request.cookies.get(ADMIN_SESSION_COOKIE)?.value);
+
+  if (path === '/admin') {
+    const url = request.nextUrl.clone();
+    url.pathname = hasAdminSessionCookie ? '/admin/dashboard' : '/admin/login';
+    url.search = hasAdminSessionCookie ? '?tab=portal' : '';
+    return NextResponse.redirect(url);
+  }
+
+  if (path.startsWith('/admin/dashboard') && !hasAdminSessionCookie) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/admin/login';
+    url.search = '';
+    url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(url);
+  }
+
+  if (path === '/api/v1/media/upload' && !hasAdminSessionCookie) {
+    return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
+  }
 
 
   // 1. Rate Limiting para Endpoints de API
@@ -54,7 +76,13 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Content-Security-Policy', cspHeader);
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-DNS-Prefetch-Control', 'on');
+  response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()'
+  );
   response.headers.set(
     'Strict-Transport-Security',
     'max-age=63072000; includeSubDomains; preload'

@@ -29,6 +29,7 @@ model Ciudad {
   sedes           SedeOficina[]
   procedimientos  ProcedimientoCiudad[]
   hospitales      Hospital[]
+  jobs            JobListing[]
   leads           Lead[]
   createdAt       DateTime              @default(now())
 
@@ -142,17 +143,89 @@ model AnalyticsLog {
 
 // Modelo de Artículos / Noticias (Migrado de WordPress a Supabase)
 model Post {
-  id         String   @id @default(uuid())
-  title      String
-  slug       String   @unique
-  content    String   // Contenido HTML o estructurado
-  excerpt    String?  // Breve resumen
-  coverImage String?  // URL de la imagen de portada
-  published  Boolean  @default(true)
-  author     String   @default("Redacción Central")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String    @id @default(uuid())
+  title           String
+  slug            String    @unique
+  content         String    // Contenido HTML o estructurado
+  excerpt         String?   // Breve resumen
+  coverImage      String?   // URL de la imagen de portada
+  published       Boolean   @default(true)
+  author          String    @default("Redacción Central")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Nuevos campos del CMS Profesional
+  metaTitle       String?
+  metaDescription String?
+  readingTime     Int?
+  viewCount       Int       @default(0)
+
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags            Tag[]
 
   @@index([slug])
+  @@index([categoryId])
 }
 
+// Modelo de Categorías
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  posts     Post[]
+  createdAt DateTime @default(now())
+}
+
+// Modelo de Etiquetas (Tags)
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  posts     Post[]
+  createdAt DateTime @default(now())
+}
+
+// Modelo de Biblioteca de Medios (Archivos subidos)
+model Media {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+}
+
+// Configuracion global del portal editable desde CMS
+model SiteSetting {
+  key       String   @id
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Vacantes de empleo gestionadas desde CMS
+model JobListing {
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  company         String
+  sectorId        String
+  sectorName      String
+  description     String
+  salaryRange     String
+  requirements    String[]
+  type            String   @default("Full-time")
+  published       Boolean  @default(true)
+  cityId          String
+  city            Ciudad   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  metaTitle       String?
+  metaDescription String?
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([cityId])
+  @@index([sectorId])
+  @@index([published])
+}

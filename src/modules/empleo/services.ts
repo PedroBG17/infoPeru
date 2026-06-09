@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db';
 
 export interface JobListing {
   id: string;
+  slug?: string;
   title: string;
   company: string;
   sector: string;
@@ -31,6 +32,40 @@ export async function getCiudadBySlug(ciudadSlug: string) {
       departamento: true,
     },
   });
+}
+
+export async function getJobsByCiudad(ciudadSlug: string): Promise<JobListing[]> {
+  try {
+    const jobs = await prisma.jobListing.findMany({
+      where: {
+        published: true,
+        city: { slug: ciudadSlug },
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gte: new Date() } },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (jobs.length === 0) return getProgrammaticJobs(ciudadSlug);
+
+    return jobs.map((job) => ({
+      id: job.id,
+      slug: job.slug,
+      title: job.title,
+      company: job.company,
+      sector: job.sectorName,
+      description: job.description,
+      salaryRange: job.salaryRange,
+      requirements: job.requirements,
+      type: job.type as JobListing['type'],
+      postedDaysAgo: Math.max(0, Math.ceil((Date.now() - job.createdAt.getTime()) / (24 * 60 * 60 * 1000))),
+    }));
+  } catch (error) {
+    console.warn('[JOBS_CMS_FALLBACK] Usando empleos programáticos:', error);
+    return getProgrammaticJobs(ciudadSlug);
+  }
 }
 
 // Generador programático de empleos hiper-localizados y realistas para evitar thin content

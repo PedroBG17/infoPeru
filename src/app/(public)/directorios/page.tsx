@@ -1,5 +1,7 @@
 import React from 'react';
 import { getMetadata } from '@/lib/seo';
+import { SourceList } from '@/components/common/source-list';
+import { editorialImages, pageSources } from '@/lib/editorial-sources';
 import { FileText, Hospital, Briefcase, ArrowRight, Sparkles } from 'lucide-react';
 
 export const revalidate = 86400; // ISR: 24 horas
@@ -44,6 +46,7 @@ export default function Page() {
     { name: 'Inicio', url: '/' },
     { name: 'Directorios', url: '/directorios' },
   ];
+  const directorySources = [...pageSources.tramites, ...pageSources.salud, ...pageSources.empleo];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-50">
@@ -115,6 +118,33 @@ export default function Page() {
             );
           })}
         </div>
+
+        <section className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm space-y-4">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+              Cómo se organiza la información
+            </h2>
+            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              DataPerú agrupa servicios ciudadanos por intención: trámites para resolver gestiones con el Estado, salud para ubicar atención y cobertura, y empleo para orientar postulaciones formales. Cada sección combina contenido editorial propio con fuentes públicas oficiales y material visual con licencia abierta o uso permitido.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-600 dark:text-slate-400">
+              <div className="rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 p-4">
+                Verifica la fuente oficial antes de pagar tasas o reservar citas.
+              </div>
+              <div className="rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 p-4">
+                Usa líneas públicas de orientación cuando haya síntomas, urgencias o dudas de cobertura.
+              </div>
+              <div className="rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 p-4">
+                Evita procesos laborales que cobren por postular, capacitar o validar documentos.
+              </div>
+            </div>
+          </div>
+          <SourceList
+            title="Fuentes editoriales del portal"
+            sources={directorySources}
+            image={editorialImages.directorios}
+          />
+        </section>
       </main>
     </div>
   );

@@ -76,3 +76,59 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+/* Hide scrollbars globally for scrollbar-none class */
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+}
+.scrollbar-none {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+/* ========== Infinite Marquee – Trámites Carousel ========== */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  gap: 1.25rem;
+  animation: marquee-scroll 38s linear infinite;
+  width: max-content;
+  padding: 0.75rem 0;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Gradient fade overlays */
+.marquee-fade-left,
+.marquee-fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.marquee-fade-left {
+  left: 0;
+  background: linear-gradient(to right, #f8fafc, transparent);
+}
+
+.marquee-fade-right {
+  right: 0;
+  background: linear-gradient(to left, #f8fafc, transparent);
+}
+
+.dark .marquee-fade-left {
+  background: linear-gradient(to right, #020617, transparent);
+}
+
+.dark .marquee-fade-right {
+  background: linear-gradient(to left, #020617, transparent);
+}

@@ -1,6 +1,7 @@
 // src/components/common/link-automatico.tsx
 import React from 'react';
 import { prisma } from '@/lib/db';
+import Link from 'next/link';
 
 interface LinkAutomaticoProps {
   type: 'tramites' | 'hospitales' | 'trabajos';
@@ -47,12 +48,12 @@ export async function LinkAutomatico({ type, ciudadSlug, excludeSlug }: LinkAuto
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
           {links.map((link) => (
             <li key={link.url}>
-              <a
+              <Link
                 href={link.url}
                 className="block p-3 rounded-lg border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors font-medium text-sm text-primary"
               >
                 {link.title}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -75,12 +76,12 @@ export async function LinkAutomatico({ type, ciudadSlug, excludeSlug }: LinkAuto
         <ul className="grid grid-cols-1 gap-2 w-full">
           {links.map((link) => (
             <li key={link.url}>
-              <a
+              <Link
                 href={link.url}
                 className="text-sm font-semibold hover:underline text-primary"
               >
                 {link.title}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

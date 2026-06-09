@@ -18,7 +18,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 11.3.0
+          version: 11.5.2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -27,10 +27,13 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm install
+        run: corepack pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
-        run: pnpm prisma generate
+        run: corepack pnpm exec prisma generate
+
+      - name: Lint
+        run: corepack pnpm run lint
 
       - name: TypeScript Compiler check
-        run: pnpm tsc --noEmit
+        run: corepack pnpm run typecheck

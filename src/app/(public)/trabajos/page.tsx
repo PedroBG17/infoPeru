@@ -1,6 +1,8 @@
 import React from 'react';
 import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
+import { SourceList } from '@/components/common/source-list';
+import { editorialImages, pageSources } from '@/lib/editorial-sources';
 import { SECTORES } from '@/modules/empleo/services';
 import { Briefcase, MapPin, ChevronRight, CheckCircle, TrendingUp } from 'lucide-react';
 
@@ -94,6 +96,32 @@ export default async function Page() {
               </div>
             </section>
 
+            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-5">
+              <h3 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100">
+                Herramientas gratuitas para postular mejor
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <article className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4">
+                  <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100">Certificado Único Laboral</h4>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                    Documento gratuito que reúne datos de identidad, antecedentes, formación y experiencia formal para procesos de selección.
+                  </p>
+                </article>
+                <article className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4">
+                  <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100">Empleos Perú</h4>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                    Bolsa virtual del Estado para registrar CV, revisar oportunidades y acceder a servicios de orientación laboral.
+                  </p>
+                </article>
+                <article className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4">
+                  <h4 className="text-sm font-bold text-slate-850 dark:text-slate-100">Centro de Empleo</h4>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                    Servicios gratuitos de intermediación, asesoría para CV, ferias laborales y orientación para buscadores de empleo.
+                  </p>
+                </article>
+              </div>
+            </section>
+
             {/* Popular Sectors Section */}
             <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-6">
               <h3 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100 flex items-center">
@@ -133,6 +161,11 @@ export default async function Page() {
                 </div>
               </div>
             </div>
+            <SourceList
+              title="Fuentes oficiales de empleo"
+              sources={pageSources.empleo}
+              image={editorialImages.empleo}
+            />
           </aside>
         </div>
       </main>

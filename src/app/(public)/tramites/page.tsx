@@ -1,6 +1,8 @@
 import React from 'react';
 import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
+import { SourceList } from '@/components/common/source-list';
+import { editorialImages, pageSources } from '@/lib/editorial-sources';
 import { FileText, MapPin, ChevronRight, HelpCircle } from 'lucide-react';
 
 export const revalidate = 86400; // ISR: 24 horas
@@ -31,6 +33,21 @@ export default async function Page() {
   const breadcrumbs = [
     { name: 'Inicio', url: '/' },
     { name: 'Trámites', url: '/tramites' },
+  ];
+
+  const officialGuides = [
+    {
+      title: 'Identidad y documentos',
+      text: 'Incluye duplicado de DNI, pasaporte electrónico y recomendaciones para revisar pagos, estado de solicitud y canales oficiales antes del recojo.',
+    },
+    {
+      title: 'Licencias y registros',
+      text: 'Resume requisitos de la licencia A-I, inscripción al RUC, certificados registrales y pasos que dependen de evaluaciones o validaciones previas.',
+    },
+    {
+      title: 'Salud y empleo ciudadano',
+      text: 'Integra trámites de afiliación SIS y Certificado Único Laboral para conectar necesidades frecuentes con servicios gratuitos del Estado.',
+    },
   ];
 
   return (
@@ -96,6 +113,23 @@ export default async function Page() {
               </div>
             </section>
 
+            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-5">
+              <h2 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100">
+                Guías oficiales priorizadas
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {officialGuides.map((guide) => (
+                  <article key={guide.title} className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4">
+                    <h3 className="text-sm font-bold text-slate-850 dark:text-slate-100">{guide.title}</h3>
+                    <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{guide.text}</p>
+                  </article>
+                ))}
+              </div>
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                Cada guía se redacta como orientación ciudadana: separa requisitos, pagos, pasos y puntos de alerta para evitar cobros indebidos, intermediarios no autorizados o errores comunes al reservar una cita.
+              </p>
+            </section>
+
             {/* General state procedures information to prevent thin content */}
             <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-4">
               <h2 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100 flex items-center">
@@ -144,6 +178,11 @@ export default async function Page() {
                 ))}
               </ul>
             </div>
+            <SourceList
+              title="Fuentes oficiales de trámites"
+              sources={pageSources.tramites}
+              image={editorialImages.tramites}
+            />
           </aside>
         </div>
       </main>

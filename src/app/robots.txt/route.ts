@@ -19,6 +19,8 @@ Sitemap: ${SITE_URL}/sitemap.xml
   } else {
     robotsTxtContent = `User-agent: *
 Disallow: /
+
+Sitemap: ${SITE_URL}/sitemap.xml
 `;
   }
 

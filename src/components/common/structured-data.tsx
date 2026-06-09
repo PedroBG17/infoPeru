@@ -36,16 +36,28 @@ interface JobPostingData {
   datePosted: string;
 }
 
-interface StructuredDataProps {
-  type: 'FAQ' | 'LocalBusiness' | 'Breadcrumb' | 'JobPosting';
-  data: FAQItem[] | BreadcrumbItem[] | LocalBusinessData | JobPostingData;
+interface ArticleData {
+  headline: string;
+  description: string;
+  image?: string | null;
+  authorName: string;
+  datePublished: string;
+  dateModified?: string;
+  url: string;
 }
+
+interface StructuredDataProps {
+  type: 'FAQ' | 'LocalBusiness' | 'Breadcrumb' | 'JobPosting' | 'Article';
+  data: FAQItem[] | BreadcrumbItem[] | LocalBusinessData | JobPostingData | ArticleData;
+}
+
+type JsonLdObject = Record<string, unknown>;
 
 /**
  * Componente que inyecta datos estructurados (Schema.org / JSON-LD) de forma segura en Server Components.
  */
 export function StructuredData({ type, data }: StructuredDataProps) {
-  let jsonLD: any = null;
+  let jsonLD: JsonLdObject | null = null;
 
   if (type === 'FAQ') {
     jsonLD = {
@@ -136,6 +148,29 @@ export function StructuredData({ type, data }: StructuredDataProps) {
         },
       };
     }
+  } else if (type === 'Article') {
+    const article = data as ArticleData;
+    jsonLD = {
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      'headline': article.headline,
+      'description': article.description,
+      'image': article.image ? [article.image] : undefined,
+      'datePublished': article.datePublished,
+      'dateModified': article.dateModified || article.datePublished,
+      'author': {
+        '@type': 'Person',
+        'name': article.authorName,
+      },
+      'publisher': {
+        '@type': 'Organization',
+        'name': 'DataPeru',
+      },
+      'mainEntityOfPage': {
+        '@type': 'WebPage',
+        '@id': article.url,
+      },
+    };
   }
 
   if (!jsonLD) return null;
@@ -147,4 +182,3 @@ export function StructuredData({ type, data }: StructuredDataProps) {
     />
   );
 }
-

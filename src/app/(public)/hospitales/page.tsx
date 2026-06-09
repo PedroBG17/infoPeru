@@ -1,9 +1,12 @@
 import React from 'react';
 import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
-import { Hospital, MapPin, ChevronRight, Heart, Shield, Clock } from 'lucide-react';
+import { SourceList } from '@/components/common/source-list';
+import { editorialImages, pageSources } from '@/lib/editorial-sources';
+import { Hospital, Heart, Shield, Clock } from 'lucide-react';
+import { CiudadesList } from '@/components/salud/ciudades-list';
 
-export const revalidate = 86400; // ISR: 24 horas
+export const dynamic = 'force-dynamic'; // No pre-renderizar en build (requiere BD)
 
 export async function generateMetadata() {
   return getMetadata({
@@ -74,48 +77,40 @@ export default async function Page() {
                 Buscar Directorio de Salud por Ciudad
               </h2>
               
-              {ciudadesConHospitales.length === 0 ? (
-                <p className="text-slate-500 text-sm">Próximamente agregaremos hospitales en tu región.</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {ciudadesConHospitales.map((c) => (
-                    <a
-                      key={c.id}
-                      href={`/hospitales/${c.slug}`}
-                      className="group flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-teal-500/40 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all duration-300"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/45 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-                          <MapPin className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-850 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                            {c.name}
-                          </h3>
-                          <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {c.hospitales.length} centros de salud registrados
-                          </span>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-700 group-hover:text-teal-500 dark:group-hover:text-teal-400 shrink-0 transition-transform group-hover:translate-x-1" />
-                    </a>
-                  ))}
-                </div>
-              )}
+              <CiudadesList initialCiudades={ciudadesConHospitales} />
             </section>
 
             {/* Informative Content for Health Systems */}
-            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-4">
+            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-5">
               <h3 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100 flex items-center">
                 <Heart className="w-5 h-5 mr-2 text-teal-500" />
                 Sistemas de Cobertura en el Perú
               </h3>
-              <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
+              <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-4 font-light">
                 <p>
                   El sistema hospitalario en el Perú comprende prestadores públicos pertenecientes al Ministerio de Salud (<strong>MINSA</strong>) y al Seguro Social de Salud (<strong>EsSalud</strong>) que cubren a los trabajadores afiliados. También existen redes privadas de clínicas que atienden a usuarios particulares o a través de Entidades Prestadoras de Salud (EPS).
                 </p>
                 <p>
                   En caso de emergencias graves que pongan en peligro la vida, cualquier establecimiento de salud del país (incluyendo clínicas privadas) está obligado legalmente por la <strong>Ley de Emergencia N° 27604</strong> a brindar atención inmediata a cualquier paciente, sin condicionar la misma al pago de garantías económicas o la tenencia de un seguro activo.
+                </p>
+                <p>
+                  Para usuarios sin seguro de salud, el SIS Gratuito puede cubrir consultas, medicamentos, análisis, hospitalización, traslados de emergencia y sepelio según evaluación y condiciones del asegurado. En casos de dengue, fiebre persistente, dolor abdominal intenso, vómitos repetidos o sangrado son señales para buscar atención inmediata.
+                </p>
+                <p>
+                  La orientación en salud del Estado también se apoya en la Línea 113. Para salud mental, el MINSA informa atención por establecimientos de primer nivel y derivación a Centros de Salud Mental Comunitaria cuando corresponde.
+                </p>
+              </div>
+
+              {/* Copyright disclaimer */}
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-450 dark:text-slate-500 leading-relaxed font-light space-y-1">
+                <p>
+                  <strong>Aviso de Copyright y Fuente de Datos:</strong>
+                </p>
+                <p>
+                  Este directorio médico regional utiliza como referencia información de interés público recopilada de los portales de Datos Abiertos del Gobierno Peruano, el Ministerio de Salud (MINSA), la Superintendencia Nacional de Salud (SUSALUD) y Google Maps.
+                </p>
+                <p>
+                  Los nombres de instituciones, marcas y logotipos de EsSalud, SIS, MINSA y clínicas particulares son propiedad registrada de sus respectivos dueños. Este portal recopila y organiza esta información únicamente con fines informativos y de orientación ciudadana, sin fines de suplantación ni atribución de derechos de propiedad intelectual.
                 </p>
               </div>
             </section>
@@ -139,6 +134,11 @@ export default async function Page() {
                 </div>
               </div>
             </div>
+            <SourceList
+              title="Fuentes oficiales de salud"
+              sources={pageSources.salud}
+              image={editorialImages.salud}
+            />
           </aside>
         </div>
       </main>
