@@ -1,5 +1,5 @@
 // src/lib/cache.ts
-import { Redis } from '@upstash/redis';
+import { Redis } from '@upstash/redis/cloudflare';
 
 /**
  * Cliente de Upstash Redis inicializado para ser compatible con Edge Runtimes y funciones serverless normales.
