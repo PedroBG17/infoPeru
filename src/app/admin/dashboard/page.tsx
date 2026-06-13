@@ -42,6 +42,266 @@ type JobListingWithCity = Prisma.JobListingGetPayload<{
   };
 }>;
 
+type DashboardTab = 'leads' | 'noticias' | 'portal';
+
+function normalizeDashboardTab(tab: string | undefined): DashboardTab {
+  return tab === 'noticias' || tab === 'portal' ? tab : 'leads';
+}
+
+async function getDashboardMetrics() {
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const [
+    totalLeads,
+    leads24h,
+    totalLogs,
+    totalPosts,
+    totalProcedimientos,
+    totalHospitales,
+  ] = await Promise.all([
+    prisma.lead.count(),
+    prisma.lead.count({ where: { createdAt: { gte: since24h } } }),
+    prisma.analyticsLog.count(),
+    prisma.post.count(),
+    prisma.procedimiento.count(),
+    prisma.hospital.count(),
+  ]);
+
+  return {
+    totalLeads,
+    leads24h,
+    totalLogs,
+    totalPosts,
+    totalProcedimientos,
+    totalHospitales,
+  };
+}
+
+async function getLeadPanelData() {
+  const [leadsBySector, recentLeads, recentLogs] = await Promise.all([
+    prisma.lead.groupBy({
+      by: ['sectorId'],
+      _count: {
+        id: true,
+      },
+    }),
+    prisma.lead.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      include: {
+        city: true,
+      },
+    }),
+    prisma.analyticsLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 8,
+    }),
+  ]);
+
+  return {
+    tab: 'leads' as const,
+    leadsBySector,
+    recentLeads,
+    recentLogs,
+  };
+}
+
+async function getNewsPanelData() {
+  const [categories, tags, mediaFiles, posts] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        _count: {
+          select: { posts: true },
+        },
+      },
+    }),
+    prisma.tag.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        _count: {
+          select: { posts: true },
+        },
+      },
+    }),
+    prisma.media.findMany({
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.post.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        category: {
+          select: { id: true, name: true },
+        },
+        tags: {
+          select: { id: true, name: true },
+        },
+      },
+    }),
+  ]);
+
+  return {
+    tab: 'noticias' as const,
+    categories,
+    tags,
+    mediaFiles,
+    posts,
+  };
+}
+
+async function getPortalPanelData() {
+  const jobListingsPromise: Promise<JobListingWithCity[]> = prisma.jobListing.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      city: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          departamento: {
+            select: { name: true },
+          },
+        },
+      },
+    },
+  }).catch((error) => {
+    console.warn('[ADMIN_JOB_LISTINGS_WARNING] Tabla de vacantes no disponible todavia:', error);
+    return [];
+  });
+
+  const [
+    siteSettings,
+    departamentos,
+    ciudades,
+    procedimientos,
+    relaciones,
+    sedes,
+    hospitales,
+    posts,
+    jobListings,
+  ] = await Promise.all([
+    getSiteSettings(),
+    prisma.departamento.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        _count: {
+          select: { ciudades: true },
+        },
+      },
+    }),
+    prisma.ciudad.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        departamento: {
+          select: { id: true, name: true },
+        },
+        _count: {
+          select: {
+            procedimientos: true,
+            hospitales: true,
+            leads: true,
+          },
+        },
+      },
+    }),
+    prisma.procedimiento.findMany({
+      orderBy: { title: 'asc' },
+      include: {
+        seoConfig: true,
+        _count: {
+          select: { ciudadesRel: true },
+        },
+      },
+    }),
+    prisma.procedimientoCiudad.findMany({
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        procedimiento: {
+          select: { id: true, title: true, slug: true },
+        },
+        ciudad: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            departamento: {
+              select: { name: true },
+            },
+          },
+        },
+        sedes: {
+          select: { id: true },
+        },
+      },
+    }),
+    prisma.sedeOficina.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        ciudad: {
+          select: { id: true, name: true, slug: true },
+        },
+        procedimientoCiudad: {
+          select: {
+            id: true,
+            procedimiento: {
+              select: { title: true, slug: true },
+            },
+            ciudad: {
+              select: { name: true, slug: true },
+            },
+          },
+        },
+      },
+    }),
+    prisma.hospital.findMany({
+      orderBy: { nombre: 'asc' },
+      include: {
+        ciudad: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            departamento: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+    }),
+    prisma.post.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        published: true,
+        metaTitle: true,
+        metaDescription: true,
+        coverImage: true,
+      },
+    }),
+    jobListingsPromise,
+  ]);
+
+  return {
+    tab: 'portal' as const,
+    siteSettings,
+    departamentos,
+    ciudades,
+    procedimientos,
+    relaciones,
+    sedes,
+    hospitales,
+    posts,
+    jobListings,
+  };
+}
+
+function getTabData(tab: DashboardTab) {
+  if (tab === 'noticias') return getNewsPanelData();
+  if (tab === 'portal') return getPortalPanelData();
+  return getLeadPanelData();
+}
+
 export async function generateMetadata() {
   return getMetadata({
     title: 'Panel de Administración - Leads y Noticias',
@@ -54,208 +314,30 @@ export async function generateMetadata() {
 export default async function AdminDashboardPage({ searchParams }: PageProps) {
   const adminSession = await requireAdminSession();
   const resolvedSearchParams = await searchParams;
-  const activeTab = resolvedSearchParams.tab || 'leads';
+  const activeTab = normalizeDashboardTab(resolvedSearchParams.tab);
   const isNoticiasTab = activeTab === 'noticias';
   const isPortalTab = activeTab === 'portal';
 
-  // 1. Obtener métricas generales
-  const totalLeads = await prisma.lead.count();
-  const leads24h = await prisma.lead.count({
-    where: {
-      createdAt: {
-        gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
-      }
-    }
-  });
+  const [metrics, tabData] = await Promise.all([
+    getDashboardMetrics(),
+    getTabData(activeTab),
+  ]);
 
-  const totalLogs = await prisma.analyticsLog.count();
-  const totalPosts = await prisma.post.count();
-  const totalProcedimientos = await prisma.procedimiento.count();
-  const totalHospitales = await prisma.hospital.count();
-  const siteSettings = await getSiteSettings();
+  const {
+    totalLeads,
+    leads24h,
+    totalLogs,
+    totalPosts,
+    totalProcedimientos,
+    totalHospitales,
+  } = metrics;
 
-  // 2. Obtener leads agrupados por sector para métricas de negocio
-  const leadsBySector = await prisma.lead.groupBy({
-    by: ['sectorId'],
-    _count: {
-      id: true
-    }
-  });
-
-  // Mapear nombres legibles a sectores
   const sectorNames: Record<string, string> = {
     'sec-salud': 'Salud / Clínicas',
     'sec-empleo': 'Bolsa de Empleo',
     'sec-mineria': 'Minería e Ing.',
     'sec-comercio': 'Comercio & Retail',
   };
-
-  // 3. Obtener últimos 10 leads registrados
-  const recentLeads = await prisma.lead.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 10,
-    include: {
-      city: true
-    }
-  });
-
-  // 4. Obtener logs de auditoría Edge recientes
-  const recentLogs = await prisma.analyticsLog.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 8
-  });
-
-  // 5. Obtener taxonomías y medios
-  const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      _count: {
-        select: { posts: true }
-      }
-    }
-  });
-
-  const tags = await prisma.tag.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      _count: {
-        select: { posts: true }
-      }
-    }
-  });
-
-  const mediaFiles = await prisma.media.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
-
-  // 6. Obtener todos los artículos/noticias para la pestaña de noticias
-  const posts = await prisma.post.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      category: {
-        select: { id: true, name: true }
-      },
-      tags: {
-        select: { id: true, name: true }
-      }
-    }
-  });
-
-  // 7. Datos estructurales del portal para CMS global
-  const departamentos = await prisma.departamento.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      _count: {
-        select: { ciudades: true },
-      },
-    },
-  });
-
-  const ciudades = await prisma.ciudad.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      departamento: {
-        select: { id: true, name: true },
-      },
-      _count: {
-        select: {
-          procedimientos: true,
-          hospitales: true,
-          leads: true,
-        },
-      },
-    },
-  });
-
-  const procedimientos = await prisma.procedimiento.findMany({
-    orderBy: { title: 'asc' },
-    include: {
-      seoConfig: true,
-      _count: {
-        select: { ciudadesRel: true },
-      },
-    },
-  });
-
-  const relaciones = await prisma.procedimientoCiudad.findMany({
-    orderBy: { updatedAt: 'desc' },
-    include: {
-      procedimiento: {
-        select: { id: true, title: true, slug: true },
-      },
-      ciudad: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          departamento: {
-            select: { name: true },
-          },
-        },
-      },
-      sedes: {
-        select: { id: true },
-      },
-    },
-  });
-
-  const sedes = await prisma.sedeOficina.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      ciudad: {
-        select: { id: true, name: true, slug: true },
-      },
-      procedimientoCiudad: {
-        select: {
-          id: true,
-          procedimiento: {
-            select: { title: true, slug: true },
-          },
-          ciudad: {
-            select: { name: true, slug: true },
-          },
-        },
-      },
-    },
-  });
-
-  const hospitales = await prisma.hospital.findMany({
-    orderBy: { nombre: 'asc' },
-    include: {
-      ciudad: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          departamento: {
-            select: { name: true },
-          },
-        },
-      },
-    },
-  });
-
-  let jobListings: JobListingWithCity[] = [];
-  try {
-    jobListings = await prisma.jobListing.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        city: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            departamento: {
-              select: { name: true },
-            },
-          },
-        },
-      },
-    });
-  } catch (error) {
-    console.warn('[ADMIN_JOB_LISTINGS_WARNING] Tabla de vacantes no disponible todavía:', error);
-  }
-
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
@@ -352,27 +434,24 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
         <DashboardTabs activeTab={isNoticiasTab ? 'noticias' : isPortalTab ? 'portal' : 'leads'} />
 
         {/* Tab Contents */}
-        {isNoticiasTab ? (
-          <PostManager initialPosts={posts} categories={categories} tags={tags} mediaFiles={mediaFiles} />
-        ) : isPortalTab ? (
+        {tabData.tab === 'noticias' ? (
+          <PostManager
+            initialPosts={tabData.posts}
+            categories={tabData.categories}
+            tags={tabData.tags}
+            mediaFiles={tabData.mediaFiles}
+          />
+        ) : tabData.tab === 'portal' ? (
           <SiteManager
-            departamentos={departamentos}
-            ciudades={ciudades}
-            procedimientos={procedimientos}
-            relaciones={relaciones}
-            sedes={sedes}
-            hospitales={hospitales}
-            posts={posts.map((post) => ({
-              id: post.id,
-              title: post.title,
-              slug: post.slug,
-              published: post.published,
-              metaTitle: post.metaTitle,
-              metaDescription: post.metaDescription,
-              coverImage: post.coverImage,
-            }))}
-            jobListings={jobListings}
-            siteSettings={siteSettings}
+            departamentos={tabData.departamentos}
+            ciudades={tabData.ciudades}
+            procedimientos={tabData.procedimientos}
+            relaciones={tabData.relaciones}
+            sedes={tabData.sedes}
+            hospitales={tabData.hospitales}
+            posts={tabData.posts}
+            jobListings={tabData.jobListings}
+            siteSettings={tabData.siteSettings}
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-200">
@@ -390,7 +469,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
                   </button>
                 </div>
 
-                {recentLeads.length === 0 ? (
+                {tabData.recentLeads.length === 0 ? (
                   <div className="p-12 text-center text-slate-500 text-sm">
                     No hay prospectos registrados actualmente en la base de datos.
                   </div>
@@ -406,7 +485,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-850 divide-slate-800/60">
-                        {recentLeads.map((lead) => (
+                        {tabData.recentLeads.map((lead) => (
                           <tr key={lead.id} className="hover:bg-slate-800/10 transition-colors">
                             <td className="px-6 py-4">
                               <div className="font-semibold text-slate-100">{lead.name}</div>
@@ -458,7 +537,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
               <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-sm">
                 <h3 className="font-bold text-lg mb-4 text-slate-100">Distribución de Leads</h3>
                 <div className="space-y-3">
-                  {leadsBySector.map((sec) => {
+                  {tabData.leadsBySector.map((sec) => {
                     const percent = totalLeads > 0 ? (sec._count.id / totalLeads) * 100 : 0;
                     return (
                       <div key={sec.sectorId} className="space-y-1">
@@ -485,10 +564,10 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
                   Auditoría de Accesos
                 </h3>
                 <div className="space-y-3">
-                  {recentLogs.length === 0 ? (
+                  {tabData.recentLogs.length === 0 ? (
                     <p className="text-xs text-slate-500">No hay registros de auditoría.</p>
                   ) : (
-                    recentLogs.map((log) => (
+                    tabData.recentLogs.map((log) => (
                       <div key={log.id} className="p-3 bg-slate-950 border border-slate-850 border-slate-800/40 rounded-xl space-y-1">
                         <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold">
                           <span className="text-cyan-400 uppercase tracking-wide truncate max-w-[120px]">{log.device}</span>

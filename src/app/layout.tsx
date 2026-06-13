@@ -75,7 +75,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const siteSettings = await getSiteSettings();
-  const tickerLoop = [...siteSettings.tickerItems, ...siteSettings.tickerItems];
 
   return (
     <html lang="es" className="scroll-smooth">
@@ -84,18 +83,6 @@ export default async function RootLayout({
       >
         <Providers>
           <div className="relative flex min-h-screen flex-col">
-            
-            {/* Marquesina Roja/Naranja del Portal (Estilo Ticker de Captura) */}
-            <div className="bg-[#B91C1C] text-white text-[11px] font-bold py-2 border-b border-[#991B1B] overflow-hidden select-none">
-              <div className="w-full flex">
-                <div className="animate-marquee flex gap-12 items-center">
-                  {tickerLoop.map((item, index) => (
-                    <span key={`${item}-${index}`}>◆ {item}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
             {/* Header / Navbar Editorial */}
             <HeaderPrincipal navigation={siteSettings.navigation} />
 
