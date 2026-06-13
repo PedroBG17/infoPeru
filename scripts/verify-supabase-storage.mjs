@@ -79,7 +79,8 @@ function loadDotEnv(file) {
     if (!trimmed || trimmed.startsWith('#')) continue;
     const index = trimmed.indexOf('=');
     if (index === -1) continue;
-    result[trimmed.slice(0, index).trim()] = stripQuotes(trimmed.slice(index + 1).trim());
+    const value = stripQuotes(trimmed.slice(index + 1).trim());
+    if (value) result[trimmed.slice(0, index).trim()] = value;
   }
   return result;
 }

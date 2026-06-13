@@ -101,7 +101,7 @@ function loadDotEnv(file) {
     if (index === -1) continue;
     const key = trimmed.slice(0, index).trim();
     const value = stripQuotes(trimmed.slice(index + 1).trim());
-    result[key] = value;
+    if (value) result[key] = value;
   }
 
   return result;
