@@ -5,12 +5,12 @@ DataPeru usa Supabase en dos capas:
 - PostgreSQL para datos del portal y CMS.
 - Supabase Storage para imagenes y medios del CMS.
 
-## 1. Bucket recomendado
+## 1. Bucket configurado
 
 Crear un bucket publico:
 
 ```text
-media
+kbucket
 ```
 
 Debe ser publico porque las imagenes del CMS se renderizan en paginas publicas: portada, noticias, SEO programatico, hospitales y empleo.
@@ -22,7 +22,7 @@ En produccion:
 ```env
 MEDIA_STORAGE_PROVIDER="supabase"
 SUPABASE_SERVICE_ROLE_KEY="TU_SERVICE_ROLE_KEY"
-SUPABASE_STORAGE_BUCKET="media"
+SUPABASE_STORAGE_BUCKET="kbucket"
 ```
 
 Opcional:
@@ -34,7 +34,7 @@ SUPABASE_STORAGE_PUBLIC_URL=""
 Si `SUPABASE_STORAGE_PUBLIC_URL` queda vacio, la aplicacion genera la URL publica nativa de Supabase:
 
 ```text
-https://PROJECT_ID.supabase.co/storage/v1/object/public/media/uploads/archivo.webp
+https://PROJECT_ID.supabase.co/storage/v1/object/public/kbucket/uploads/archivo.webp
 ```
 
 ## 3. Seguridad
@@ -88,7 +88,7 @@ public/uploads
 
 Para migrarlos manualmente:
 
-1. Subir cada archivo al bucket `media` dentro de `uploads/`.
+1. Subir cada archivo al bucket `kbucket` dentro de `uploads/`.
 2. Actualizar las URLs guardadas en la tabla `Media` si eran `/uploads/...`.
 3. Revisar noticias y portada que usen imagenes antiguas.
 

@@ -24,6 +24,15 @@ Configurar en el proveedor de hosting:
 - `MEDIA_STORAGE_PROVIDER`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `SUPABASE_STORAGE_BUCKET`
+- `ENABLE_EXPERIMENTAL_COREPACK`
+
+Valores productivos esperados:
+
+```text
+MEDIA_STORAGE_PROVIDER=supabase
+SUPABASE_STORAGE_BUCKET=kbucket
+ENABLE_EXPERIMENTAL_COREPACK=1
+```
 
 Para generar un hash de contraseña admin:
 
@@ -72,6 +81,7 @@ Remove-Item Env:\SMOKE_ADMIN_PASSWORD
 ## Pendientes recomendados para producción avanzada
 
 - Configurar bucket publico de Supabase Storage para medios del CMS.
+- Confirmar que el cron versionado en `vercel.json` aparece en Vercel y responde con `200` desde el panel de Cron Jobs.
 - Mantener migraciones Prisma versionadas para cada cambio futuro de esquema.
 - Añadir backups programados de Supabase.
 - Configurar monitoreo de errores y alertas de uptime.

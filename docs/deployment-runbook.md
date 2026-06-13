@@ -10,6 +10,7 @@ Este documento deja el camino operativo para pasar el portal y el CMS a producci
 - Supabase PostgreSQL con `DATABASE_URL` y `DIRECT_URL`.
 - Supabase Storage con bucket publico para medios del CMS.
 - Upstash Redis configurado.
+- Corepack habilitado en Vercel con `ENABLE_EXPERIMENTAL_COREPACK=1`.
 
 ## 2. Variables de entorno
 
@@ -31,15 +32,18 @@ ADMIN_SESSION_SECRET
 MEDIA_STORAGE_PROVIDER
 SUPABASE_SERVICE_ROLE_KEY
 SUPABASE_STORAGE_BUCKET
+ENABLE_EXPERIMENTAL_COREPACK
 ```
 
 En produccion usar:
 
 ```text
 MEDIA_STORAGE_PROVIDER=supabase
+SUPABASE_STORAGE_BUCKET=kbucket
+ENABLE_EXPERIMENTAL_COREPACK=1
 ```
 
-El bucket recomendado es `media` y debe ser publico para que las imagenes del CMS rendericen en las paginas publicas.
+El bucket configurado para este proyecto es `kbucket` y debe ser publico para que las imagenes del CMS rendericen en las paginas publicas.
 
 `SUPABASE_SERVICE_ROLE_KEY` es server-only. No debe exponerse en cliente ni usar prefijo `NEXT_PUBLIC_`.
 
@@ -94,6 +98,13 @@ corepack pnpm run verify:supabase-storage
 
 ## 5. Deploy
 
+El archivo `vercel.json` deja versionado:
+
+- Framework Next.js.
+- Install command con pnpm/Corepack.
+- Build command `corepack pnpm run build`.
+- Cron diario `0 9 * * *` (UTC) hacia `/api/v1/cron/update-costs`.
+
 El workflow `.github/workflows/deploy.yml` ejecuta:
 
 - Instalacion pnpm con lockfile congelado.
@@ -142,7 +153,7 @@ Remove-Item Env:\SMOKE_ADMIN_PASSWORD
 - Sitemap incluye rutas principales.
 - Robots expone la URL del sitemap.
 - `/api/v1/webhooks/revalidate` rechaza requests sin token.
-- `/api/v1/cron/update-costs` rechaza requests sin `CRON_SECRET`.
+- `/api/v1/cron/update-costs` rechaza requests sin `CRON_SECRET` y no modifica costos automaticamente sin fuente oficial estructurada.
 
 ## 8. Rollback
 
