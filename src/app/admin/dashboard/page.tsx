@@ -3,10 +3,10 @@ import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
 import { getSiteSettings } from '@/lib/site-settings';
 import { requireAdminSession } from '@/lib/admin-auth';
+import { DashboardTabs } from './dashboard-tabs';
 import { PostManager } from './post-manager';
 import { SiteManager } from './site-manager';
 import type { Prisma } from '@prisma/client';
-import Link from 'next/link';
 import { 
   Users, 
   ShieldAlert, 
@@ -349,26 +349,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-900 gap-6">
-          <Link 
-            href="/admin/dashboard?tab=leads" 
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${!isNoticiasTab && !isPortalTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
-          >
-            Leads y Auditoría
-          </Link>
-          <Link 
-            href="/admin/dashboard?tab=noticias" 
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${isNoticiasTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
-          >
-            Gestión de Noticias
-          </Link>
-          <Link 
-            href="/admin/dashboard?tab=portal" 
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${isPortalTab ? 'border-teal-400 text-teal-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
-          >
-            Gestión del Portal
-          </Link>
-        </div>
+        <DashboardTabs activeTab={isNoticiasTab ? 'noticias' : isPortalTab ? 'portal' : 'leads'} />
 
         {/* Tab Contents */}
         {isNoticiasTab ? (
