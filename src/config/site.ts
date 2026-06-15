@@ -1,13 +1,13 @@
 // src/config/site.ts
 
 export const siteConfig = {
-  name: 'DataPerú',
+  name: 'ClavePerú',
   description: 'Portal de trámites, salud, empleo y directorios regionales en todo el Perú.',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://dataperu.pe',
   ogImage: 'https://dataperu.pe/assets/default-og.png',
   links: {
-    twitter: 'https://twitter.com/DataPeruOficial',
-    github: 'https://github.com/dataperu',
+    twitter: '',
+    github: 'https://github.com/PedroBG17/infoPeru',
   },
   mainNav: [
     {

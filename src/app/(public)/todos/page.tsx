@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata() {
   return getMetadata({
-    title: 'Todos los servicios ciudadanos de DataPerú',
-    description: 'Mapa general de trámites, hospitales, empleo y directorios ciudadanos disponibles en DataPerú, con fuentes oficiales citadas.',
+    title: 'Todos los servicios ciudadanos de ClavePerú',
+    description: 'Mapa general de trámites, hospitales, empleo y directorios ciudadanos disponibles en ClavePerú, con fuentes oficiales citadas.',
     slug: '/todos',
   });
 }
@@ -73,7 +73,7 @@ export default async function Page() {
               Todos los servicios ciudadanos
             </h1>
             <p className="text-lg text-slate-300 leading-relaxed">
-              Explora en una sola vista las secciones informativas de DataPerú. Esta página no lista noticias: solo servicios permanentes, trámites, directorios y recursos de orientación ciudadana.
+              Explora en una sola vista las secciones informativas de ClavePerú. Esta página no lista noticias: solo servicios permanentes, trámites, directorios y recursos de orientación ciudadana.
             </p>
           </div>
         </header>

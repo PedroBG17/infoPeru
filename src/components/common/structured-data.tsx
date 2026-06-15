@@ -164,7 +164,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
       },
       'publisher': {
         '@type': 'Organization',
-        'name': 'DataPeru',
+        'name': 'ClavePeru',
       },
       'mainEntityOfPage': {
         '@type': 'WebPage',

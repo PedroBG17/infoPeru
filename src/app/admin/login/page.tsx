@@ -16,7 +16,7 @@ type LoginPageProps = {
 export async function generateMetadata() {
   return getMetadata({
     title: 'Acceso Admin',
-    description: 'Acceso seguro al panel administrativo de DataPerú.',
+    description: 'Acceso seguro al panel administrativo de ClavePerú.',
     slug: '/admin/login',
     noIndex: true,
   });

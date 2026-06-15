@@ -2,7 +2,9 @@
 import '@/styles/globals.css';
 import React from 'react';
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Providers } from './providers';
+import { adsConfig } from '@/config/ads';
 import { siteConfig } from '@/config/site';
 import { Montserrat, Open_Sans } from 'next/font/google';
 import { HeaderPrincipal } from '@/components/common/header-principal';
@@ -81,6 +83,15 @@ export default async function RootLayout({
       <body
         className={`${fontSans.variable} ${fontHeading.variable} min-h-screen bg-background text-foreground font-sans antialiased transition-colors duration-300`}
       >
+        {adsConfig.adsense.enabled && (
+          <Script
+            id="google-adsense-auto-ads"
+            async
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsConfig.adsense.client}`}
+            crossOrigin="anonymous"
+          />
+        )}
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             {/* Header / Navbar Editorial */}
@@ -94,7 +105,7 @@ export default async function RootLayout({
               <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-4">
                   <h3 className="font-heading font-black text-white text-lg">
-                    Info<span className="text-[#FF5A1F]">Perú</span>
+                    Clave<span className="text-[#FF5A1F]">Perú</span>
                   </h3>
                   <p className="text-xs text-slate-400 leading-relaxed font-light">
                     {siteSettings.footerDescription}
@@ -141,7 +152,7 @@ export default async function RootLayout({
               </div>
               <div className="max-w-6xl mx-auto px-4 border-t border-slate-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
                 <p className="text-[10px] text-slate-500">
-                  © {new Date().getFullYear()} InfoPerú. Todos los derechos reservados.
+                  © {new Date().getFullYear()} ClavePerú. Todos los derechos reservados.
                 </p>
                 <p className="text-[10px] text-slate-550 flex items-center gap-1.5 justify-center">
                   <span>{siteSettings.footerSecurityLabel}</span>

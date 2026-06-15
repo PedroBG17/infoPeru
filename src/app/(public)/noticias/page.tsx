@@ -99,7 +99,7 @@ export default async function NoticiasPage() {
                     <img src={featuredPost.coverImage} alt={featuredPost.title} className="aspect-video h-full w-full object-cover" />
                   ) : (
                     <div className="flex aspect-video h-full w-full items-center justify-center bg-slate-900 text-sm font-bold uppercase tracking-widest text-teal-300">
-                      DataPeru Noticias
+                      ClavePerú Noticias
                     </div>
                   )}
                 </a>
@@ -130,7 +130,7 @@ export default async function NoticiasPage() {
                       <img src={post.coverImage} alt={post.title} className="aspect-video w-full object-cover" loading="lazy" />
                     ) : (
                       <div className="flex aspect-video w-full items-center justify-center bg-slate-900 text-xs font-bold uppercase tracking-widest text-teal-300">
-                        DataPeru
+                        ClavePerú
                       </div>
                     )}
                   </a>

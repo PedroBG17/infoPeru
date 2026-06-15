@@ -148,7 +148,7 @@ export default async function Page() {
             <div className="bg-gradient-to-br from-slate-900 to-amber-950 text-white p-6 rounded-3xl shadow-xl border border-amber-500/20 space-y-4">
               <h3 className="font-bold text-lg text-amber-300">Garantía de Seguridad</h3>
               <p className="text-xs text-amber-100/90 leading-relaxed">
-                Todas las convocatorias de empleo e intermediaciones de hojas de vida (CV) publicadas en DataPerú son gratuitas para el postulante.
+                Todas las convocatorias de empleo e intermediaciones de hojas de vida (CV) publicadas en ClavePerú son gratuitas para el postulante.
               </p>
               <div className="space-y-3 pt-2">
                 <div className="flex items-center space-x-2 text-xs text-amber-100">

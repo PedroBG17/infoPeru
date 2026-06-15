@@ -469,7 +469,7 @@ const jobs = [
   {
     title: 'Registro de postulantes - Administración y atención al cliente',
     slug: 'registro-postulantes-administracion-lima',
-    company: 'DataPerú Bolsa de Talentos',
+    company: 'ClavePerú Bolsa de Talentos',
     sectorId: 'sec-admin',
     sectorName: 'Administración y Finanzas',
     description:
@@ -482,7 +482,7 @@ const jobs = [
   {
     title: 'Registro de postulantes - Turismo, gastronomía y servicios',
     slug: 'registro-postulantes-turismo-arequipa',
-    company: 'DataPerú Bolsa de Talentos',
+    company: 'ClavePerú Bolsa de Talentos',
     sectorId: 'sec-turismo',
     sectorName: 'Turismo y Gastronomía',
     description:
@@ -495,7 +495,7 @@ const jobs = [
   {
     title: 'Registro de postulantes - Agroindustria y operaciones',
     slug: 'registro-postulantes-agroindustria-trujillo',
-    company: 'DataPerú Bolsa de Talentos',
+    company: 'ClavePerú Bolsa de Talentos',
     sectorId: 'sec-agro',
     sectorName: 'Agroindustria y Pesca',
     description:
@@ -508,7 +508,7 @@ const jobs = [
   {
     title: 'Registro de postulantes - Comercio, ventas y logística',
     slug: 'registro-postulantes-comercio-piura',
-    company: 'DataPerú Bolsa de Talentos',
+    company: 'ClavePerú Bolsa de Talentos',
     sectorId: 'sec-comercio',
     sectorName: 'Comercio y Retail',
     description:
@@ -521,7 +521,7 @@ const jobs = [
   {
     title: 'Registro de postulantes - Educación, turismo y servicios locales',
     slug: 'registro-postulantes-servicios-cusco',
-    company: 'DataPerú Bolsa de Talentos',
+    company: 'ClavePerú Bolsa de Talentos',
     sectorId: 'sec-educacion',
     sectorName: 'Educación y Academia',
     description:
@@ -576,7 +576,7 @@ async function upsertSede(
 }
 
 async function main() {
-  console.log('Enriqueciendo contenido público de DataPerú sin modificar noticias...');
+  console.log('Enriqueciendo contenido público de ClavePerú sin modificar noticias...');
 
   const departmentBySlug = new Map<string, { id: string }>();
   const cityBySlug = new Map<string, { id: string; name: string; slug: string }>();
@@ -742,7 +742,7 @@ async function main() {
         footerDescription:
           'Portal ciudadano independiente con noticias, trámites, salud, empleo y directorios regionales del Perú. La información se resume desde fuentes oficiales citadas.',
         footerLegalText:
-          'DataPerú es una plataforma informativa independiente. No reemplaza a las entidades públicas; confirme siempre requisitos y pagos en',
+          'ClavePerú es una plataforma informativa independiente. No reemplaza a las entidades públicas; confirme siempre requisitos y pagos en',
         footerLegalLinkLabel: 'Gob.pe',
         footerLegalLinkHref: 'https://www.gob.pe',
         footerSecurityLabel: 'CMS seguro y almacenamiento Supabase',
@@ -774,13 +774,13 @@ async function main() {
           ],
         },
         seo: {
-          siteName: 'DataPerú',
-          titleDefault: 'DataPerú | Trámites, salud, empleo y noticias del Perú',
-          titleTemplate: '%s | DataPerú',
+          siteName: 'ClavePerú',
+          titleDefault: 'ClavePerú | Trámites, salud, empleo y noticias del Perú',
+          titleTemplate: '%s | ClavePerú',
           description:
             'Portal ciudadano peruano con guías de trámites, directorio de hospitales, empleo regional y noticias, con fuentes oficiales citadas.',
           keywords: [
-            'dataperu',
+            'claveperu',
             'trámites Perú',
             'hospitales Perú',
             'SIS gratuito',
@@ -790,11 +790,11 @@ async function main() {
             'certificado único laboral',
             'empleos Perú',
           ],
-          ogTitle: 'DataPerú - Servicios ciudadanos del Perú',
+          ogTitle: 'ClavePerú - Servicios ciudadanos del Perú',
           ogDescription:
             'Trámites, salud, empleo y noticias con contenido gestionable y fuentes oficiales citadas.',
           ogImage: 'https://dataperu.pe/assets/default-og.png',
-          twitterTitle: 'DataPerú',
+          twitterTitle: 'ClavePerú',
           twitterDescription: 'Portal ciudadano de trámites, salud, empleo y noticias del Perú.',
         },
       },
@@ -812,7 +812,7 @@ async function main() {
         footerDescription:
           'Portal ciudadano independiente con noticias, trámites, salud, empleo y directorios regionales del Perú. La información se resume desde fuentes oficiales citadas.',
         footerLegalText:
-          'DataPerú es una plataforma informativa independiente. No reemplaza a las entidades públicas; confirme siempre requisitos y pagos en',
+          'ClavePerú es una plataforma informativa independiente. No reemplaza a las entidades públicas; confirme siempre requisitos y pagos en',
         footerLegalLinkLabel: 'Gob.pe',
         footerLegalLinkHref: 'https://www.gob.pe',
         footerSecurityLabel: 'CMS seguro y almacenamiento Supabase',
@@ -844,13 +844,13 @@ async function main() {
           ],
         },
         seo: {
-          siteName: 'DataPerú',
-          titleDefault: 'DataPerú | Trámites, salud, empleo y noticias del Perú',
-          titleTemplate: '%s | DataPerú',
+          siteName: 'ClavePerú',
+          titleDefault: 'ClavePerú | Trámites, salud, empleo y noticias del Perú',
+          titleTemplate: '%s | ClavePerú',
           description:
             'Portal ciudadano peruano con guías de trámites, directorio de hospitales, empleo regional y noticias, con fuentes oficiales citadas.',
           keywords: [
-            'dataperu',
+            'claveperu',
             'trámites Perú',
             'hospitales Perú',
             'SIS gratuito',
@@ -860,11 +860,11 @@ async function main() {
             'certificado único laboral',
             'empleos Perú',
           ],
-          ogTitle: 'DataPerú - Servicios ciudadanos del Perú',
+          ogTitle: 'ClavePerú - Servicios ciudadanos del Perú',
           ogDescription:
             'Trámites, salud, empleo y noticias con contenido gestionable y fuentes oficiales citadas.',
           ogImage: 'https://dataperu.pe/assets/default-og.png',
-          twitterTitle: 'DataPerú',
+          twitterTitle: 'ClavePerú',
           twitterDescription: 'Portal ciudadano de trámites, salud, empleo y noticias del Perú.',
         },
       },

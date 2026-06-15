@@ -208,7 +208,7 @@ export default async function Page({ params }: PageProps) {
                     La empleabilidad en la región de <strong>{ciudadData.name}</strong> está impulsada por el dinamismo de sectores clave. En el mercado peruano, contar con habilidades blandas, manejo de herramientas ofimáticas y experiencia sectorial verificable son los factores decisivos para superar los procesos de reclutamiento de personal.
                   </p>
                   <p>
-                    <strong>Nota de Seguridad:</strong> Todos los procesos de selección mostrados en DataPerú son 100% gratuitos para el postulante. Nunca realices ningún tipo de pago por concepto de evaluaciones médicas, capacitaciones de ingreso o trámites administrativos a empresas reclutadoras.
+                    <strong>Nota de Seguridad:</strong> Todos los procesos de selección mostrados en ClavePerú son 100% gratuitos para el postulante. Nunca realices ningún tipo de pago por concepto de evaluaciones médicas, capacitaciones de ingreso o trámites administrativos a empresas reclutadoras.
                   </p>
                   <p>
                     Antes de postular, prepara tu Certificado Único Laboral y mantén actualizado tu CV en Empleos Perú. Estos servicios son gratuitos y ayudan a validar datos de identidad, antecedentes, formación y experiencia formal frente a empleadores.

@@ -14,8 +14,8 @@ async function main() {
     const res = await fetch(`${baseUrl}/`);
     assert(res.status === 200, `expected 200, got ${res.status}`);
     const html = await res.text();
-    assert(html.includes('DataPerú | Trámites, salud, empleo y noticias del Perú'), 'missing default title');
-    assert(html.includes('DataPerú - Servicios ciudadanos del Perú'), 'missing OG title');
+    assert(html.includes('ClavePerú | Trámites, salud, empleo y noticias del Perú'), 'missing default title');
+    assert(html.includes('ClavePerú - Servicios ciudadanos del Perú'), 'missing OG title');
     assert(html.includes('Ver servicios'), 'missing CMS navigation CTA');
   });
 

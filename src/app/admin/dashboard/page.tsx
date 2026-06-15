@@ -305,7 +305,7 @@ function getTabData(tab: DashboardTab) {
 export async function generateMetadata() {
   return getMetadata({
     title: 'Panel de Administración - Leads y Noticias',
-    description: 'Consola interna de DataPerú para el seguimiento de leads de monetización y administración de noticias.',
+    description: 'Consola interna de ClavePerú para el seguimiento de leads de monetización y administración de noticias.',
     slug: '/admin/dashboard',
     noIndex: true // Los motores de búsqueda jamás deben indexar la administración
   });
@@ -349,7 +349,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
               DP
             </div>
             <div>
-              <span className="font-extrabold text-sm tracking-wide uppercase text-teal-400">DataPerú Admin</span>
+              <span className="font-extrabold text-sm tracking-wide uppercase text-teal-400">ClavePerú Admin</span>
               <span className="block text-[10px] text-slate-500">Panel de Control Interno v1.1</span>
             </div>
           </div>

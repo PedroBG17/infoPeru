@@ -160,7 +160,7 @@ export default async function Page({ params }: PageProps) {
           <div>
             <h4 className="font-bold text-slate-950 dark:text-white">¿Te resultó útil este artículo?</h4>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              DataPerú compila información pública y guías oficiales de forma simple y gratuita.
+              ClavePerú compila información pública y guías oficiales de forma simple y gratuita.
             </p>
           </div>
           <Link

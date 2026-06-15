@@ -9,7 +9,7 @@ export const revalidate = 86400; // ISR: 24 horas
 export async function generateMetadata() {
   return getMetadata({
     title: 'Directorios de Información Regional y Servicios en el Perú',
-    description: 'Accede a los directorios regionales de DataPerú: trámites oficiales del TUPA, redes de hospitales y clínicas del MINSA y EsSalud, y bolsa de empleo por ciudad.',
+    description: 'Accede a los directorios regionales de ClavePerú: trámites oficiales del TUPA, redes de hospitales y clínicas del MINSA y EsSalud, y bolsa de empleo por ciudad.',
     slug: '/directorios',
   });
 }
@@ -125,7 +125,7 @@ export default function Page() {
               Cómo se organiza la información
             </h2>
             <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              DataPerú agrupa servicios ciudadanos por intención: trámites para resolver gestiones con el Estado, salud para ubicar atención y cobertura, y empleo para orientar postulaciones formales. Cada sección combina contenido editorial propio con fuentes públicas oficiales y material visual con licencia abierta o uso permitido.
+              ClavePerú agrupa servicios ciudadanos por intención: trámites para resolver gestiones con el Estado, salud para ubicar atención y cobertura, y empleo para orientar postulaciones formales. Cada sección combina contenido editorial propio con fuentes públicas oficiales y material visual con licencia abierta o uso permitido.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-600 dark:text-slate-400">
               <div className="rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 p-4">

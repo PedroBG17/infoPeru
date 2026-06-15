@@ -27,7 +27,7 @@ export function getMetadata({
   const url = `${DEFAULT_SITE_URL}${slug.startsWith('/') ? slug : `/${slug}`}`;
 
   return {
-    title: `${title} | DataPerú`,
+    title: `${title} | ClavePerú`,
     description,
     metadataBase: new URL(DEFAULT_SITE_URL),
     alternates: {
@@ -47,10 +47,10 @@ export function getMetadata({
           },
         },
     openGraph: {
-      title: `${title} | DataPerú`,
+      title: `${title} | ClavePerú`,
       description,
       url,
-      siteName: 'DataPerú',
+      siteName: 'ClavePerú',
       images: [
         {
           url: ogImage.startsWith('http') ? ogImage : `${DEFAULT_SITE_URL}${ogImage}`,
@@ -64,10 +64,9 @@ export function getMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | DataPerú`,
+      title: `${title} | ClavePerú`,
       description,
       images: [ogImage.startsWith('http') ? ogImage : `${DEFAULT_SITE_URL}${ogImage}`],
-      creator: '@DataPeruOficial',
     },
   };
 }

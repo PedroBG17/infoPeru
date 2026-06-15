@@ -32,9 +32,9 @@ export const defaultSiteSettings: SiteSettings = {
     trustBadges: ['Información Confiable', 'Actualizada Diariamente', 'Acceso Gratuito'],
   },
   navigation: {
-    brandPrefix: 'DATA',
+    brandPrefix: 'CLAVE',
     brandName: 'Perú',
-    brandAccent: '+',
+    brandAccent: '',
     ctaLabel: 'Buscador de Trámites',
     ctaHref: '/tramites',
     links: [
@@ -45,12 +45,12 @@ export const defaultSiteSettings: SiteSettings = {
     ],
   },
   seo: {
-    siteName: 'Info Perú',
-    titleDefault: 'Info Perú | Portal Informativo Regional y Trámites',
-    titleTemplate: '%s | Info Perú',
+    siteName: 'ClavePerú',
+    titleDefault: 'ClavePerú | Portal Informativo Regional y Trámites',
+    titleTemplate: '%s | ClavePerú',
     description: 'Portal de trámites, noticias locales del norte peruano, salud y bolsa de empleo.',
     keywords: [
-      'info perú',
+      'claveperu',
       'trámites perú',
       'noticias piura',
       'noticias talara',
@@ -59,11 +59,11 @@ export const defaultSiteSettings: SiteSettings = {
       'convocatorias de trabajo',
       'tupa perú',
     ],
-    ogTitle: 'Info Perú - Portal Informativo',
+    ogTitle: 'ClavePerú - Portal Informativo',
     ogDescription:
       'Noticias locales, guías de trámites del Estado y consejos de salud para el norte del Perú.',
     ogImage: 'https://dataperu.pe/assets/default-og.png',
-    twitterTitle: 'Info Perú',
+    twitterTitle: 'ClavePerú',
     twitterDescription: 'Portal informativo de trámites y actualidad regional del Perú.',
   },
 };
