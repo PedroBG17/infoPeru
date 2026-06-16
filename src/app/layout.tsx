@@ -3,26 +3,33 @@ import '@/styles/globals.css';
 import React from 'react';
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import Link from 'next/link';
+import { Inter, JetBrains_Mono, Playfair_Display } from 'next/font/google';
 import { Providers } from './providers';
 import { adsConfig } from '@/config/ads';
 import { siteConfig } from '@/config/site';
-import { Montserrat, Open_Sans } from 'next/font/google';
 import { HeaderPrincipal } from '@/components/common/header-principal';
 import { getSiteSettings } from '@/lib/site-settings';
-import Link from 'next/link';
 
-const fontSans = Open_Sans({
+const fontSans = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
 });
 
-const fontHeading = Montserrat({
+const fontHeading = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-heading',
   display: 'swap',
-  weight: ['400', '500', '600', '700', '800', '900'],
+  weight: ['400', '600', '700', '800', '900'],
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -81,7 +88,7 @@ export default async function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body
-        className={`${fontSans.variable} ${fontHeading.variable} min-h-screen bg-background text-foreground font-sans antialiased transition-colors duration-300`}
+        className={`${fontSans.variable} ${fontHeading.variable} ${fontMono.variable} min-h-screen bg-background text-foreground font-sans antialiased transition-colors duration-300`}
       >
         {adsConfig.adsense.enabled && (
           <Script
@@ -94,69 +101,98 @@ export default async function RootLayout({
         )}
         <Providers>
           <div className="relative flex min-h-screen flex-col">
-            {/* Header / Navbar Editorial */}
-            <HeaderPrincipal navigation={siteSettings.navigation} />
+            <HeaderPrincipal
+              navigation={siteSettings.navigation}
+              tickerItems={siteSettings.tickerItems}
+            />
 
-            {/* Area de Contenido */}
             <main className="flex-1">{children}</main>
 
-            {/* Footer Editorial */}
-            <footer className="bg-[#0B1528] text-white border-t border-slate-800 py-16">
-              <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="space-y-4">
-                  <h3 className="font-heading font-black text-white text-lg">
-                    Clave<span className="text-[#FF5A1F]">Perú</span>
+            <footer className="bg-[#0A0F1E] pt-12 text-white">
+              <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 border-b border-white/10 px-4 pb-10 sm:px-6 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
+                <div>
+                  <h3 className="font-heading text-3xl font-black text-white">
+                    Clave<span className="text-[#C8102E]">Perú</span>
                   </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed font-light">
+                  <p className="mt-4 max-w-xs text-sm leading-7 text-white/55">
                     {siteSettings.footerDescription}
                   </p>
                 </div>
+
                 <div>
-                  <h4 className="font-heading font-bold text-sm text-white mb-4">
-                    Enlaces de Utilidad
+                  <h4 className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-white/85">
+                    Secciones
                   </h4>
-                  <ul className="space-y-3 text-xs text-slate-450">
+                  <ul className="space-y-3 text-sm text-white/60">
                     <li>
-                      <Link href="/tramites" className="hover:text-[#FF5A1F] transition-colors">
-                        Guías del TUPA
+                      <Link href="/noticias" className="transition hover:text-white">
+                        Noticias
                       </Link>
                     </li>
                     <li>
-                      <Link href="/hospitales" className="hover:text-[#FF5A1F] transition-colors">
-                        Directorio de Clínicas e Hospitales
+                      <Link href="/tramites" className="transition hover:text-white">
+                        Tramites
                       </Link>
                     </li>
                     <li>
-                      <Link href="/trabajos" className="hover:text-[#FF5A1F] transition-colors">
-                        Convocatorias Laborales
+                      <Link href="/hospitales" className="transition hover:text-white">
+                        Hospitales
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/trabajos" className="transition hover:text-white">
+                        Empleo
                       </Link>
                     </li>
                   </ul>
                 </div>
+
                 <div>
-                  <h4 className="font-heading font-bold text-sm text-white mb-4">
-                    Seguridad y Descargo Legal
+                  <h4 className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-white/85">
+                    Servicios
                   </h4>
-                  <p className="text-[11px] text-slate-400 leading-relaxed font-light">
+                  <ul className="space-y-3 text-sm text-white/60">
+                    <li>
+                      <Link href="/directorios" className="transition hover:text-white">
+                        Directorios
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/todos" className="transition hover:text-white">
+                        Todos los servicios
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/admin/login" className="transition hover:text-white">
+                        CMS
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-white/85">
+                    Legal
+                  </h4>
+                  <p className="text-sm leading-7 text-white/55">
                     {siteSettings.footerLegalText}{' '}
                     <a
                       href={siteSettings.footerLegalLinkHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline text-[#FF5A1F] hover:text-[#e04f18] font-medium"
+                      className="font-semibold text-[#F59E0B] underline transition hover:text-white"
                     >
                       {siteSettings.footerLegalLinkLabel}
                     </a>.
                   </p>
                 </div>
               </div>
-              <div className="max-w-6xl mx-auto px-4 border-t border-slate-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-                <p className="text-[10px] text-slate-500">
-                  © {new Date().getFullYear()} ClavePerú. Todos los derechos reservados.
-                </p>
-                <p className="text-[10px] text-slate-550 flex items-center gap-1.5 justify-center">
+
+              <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-4 px-4 py-6 text-center font-mono text-[10px] uppercase tracking-[0.12em] text-white/30 sm:flex-row sm:px-6 sm:text-left">
+                <p>© {new Date().getFullYear()} ClavePerú. Todos los derechos reservados.</p>
+                <p className="flex items-center justify-center gap-2">
                   <span>{siteSettings.footerSecurityLabel}</span>
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </p>
               </div>
             </footer>
