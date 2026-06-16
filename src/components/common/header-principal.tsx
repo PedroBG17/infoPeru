@@ -103,12 +103,12 @@ export function HeaderPrincipal({ navigation, tickerItems = [] }: HeaderPrincipa
 
       <div className="hidden h-9 items-center overflow-hidden bg-[#C8102E] text-white md:flex">
         <span className="z-10 flex h-full shrink-0 items-center bg-[#0A0F1E] px-4 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[#F59E0B]">
-          En vivo
+          Actualizado
         </span>
         <div className="flex w-max animate-[marquee-scroll_42s_linear_infinite] whitespace-nowrap hover:[animation-play-state:paused]">
           {[...ticker, ...ticker].map((item, index) => (
             <span key={`${item}-${index}`} className="px-7 text-xs font-semibold tracking-[0.01em]">
-              <span className="mr-3 text-[8px] opacity-70">●</span>
+              <span className="mr-3 opacity-70">|</span>
               {item}
             </span>
           ))}

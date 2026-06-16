@@ -422,7 +422,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
               <span className="text-3xl font-extrabold mt-2 block text-amber-400">
                 {totalProcedimientos} <span className="text-xs text-slate-500 font-normal">trám.</span> / {totalHospitales} <span className="text-xs text-slate-500 font-normal">salud</span>
               </span>
-              <span className="text-[10px] text-slate-500 mt-1 block">{totalLogs} eventos de auditorÃ­a registrados</span>
+              <span className="text-[10px] text-slate-500 mt-1 block">{totalLogs} eventos de auditoria registrados</span>
             </div>
             <div className="w-12 h-12 bg-slate-800 text-amber-400 rounded-xl flex items-center justify-center">
               <ShieldAlert className="w-6 h-6" />

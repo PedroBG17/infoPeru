@@ -145,11 +145,11 @@ export const editorialImages = {
     license: 'CC BY-SA 4.0',
   },
   empleo: {
-    src: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1200',
-    alt: 'Equipo de trabajo en una oficina moderna',
-    credit: 'You X Ventures / Unsplash',
-    sourceUrl: 'https://unsplash.com/photos/people-doing-office-works-QBpZGqEMsKg',
-    license: 'Unsplash License',
+    src: 'https://commons.wikimedia.org/wiki/Special:FilePath/PCM-Trabajo.png',
+    alt: 'Identidad visual del Ministerio de Trabajo y Promocion del Empleo del Peru',
+    credit: 'CanalesQuintanilla / Wikimedia Commons',
+    sourceUrl: 'https://commons.wikimedia.org/wiki/File:PCM-Trabajo.png',
+    license: 'Dominio publico - simbolo oficial',
   },
   directorios: {
     src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Lima%20Palacio%20del%20gobierno%20del%20Per%C3%BA.jpg',

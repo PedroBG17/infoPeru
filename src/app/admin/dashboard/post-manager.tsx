@@ -763,7 +763,7 @@ export function PostManager({ initialPosts, categories: initialCategories, tags:
                       type="url"
                       value={coverImage}
                       onChange={(e) => setCoverImage(e.target.value)}
-                      placeholder="https://images.unsplash.com/..."
+                      placeholder="URL publica de imagen o selecciona desde biblioteca"
                       className="flex-1 bg-slate-950 border border-slate-850 border-slate-800/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-hidden focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
                     />
                     <button
