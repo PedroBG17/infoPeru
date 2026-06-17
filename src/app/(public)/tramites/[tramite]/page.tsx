@@ -1,12 +1,20 @@
-import React from 'react';
 import { notFound } from 'next/navigation';
+import { Check, FileText, MapPin, ShieldCheck } from 'lucide-react';
 import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
 import { SourceList } from '@/components/common/source-list';
 import { pageSources, procedureSources } from '@/lib/editorial-sources';
-import { FileText, MapPin, ChevronRight, Check } from 'lucide-react';
+import {
+  Breadcrumbs,
+  EditorialHero,
+  EditorialPanel,
+  LinkCard,
+  PortalShell,
+  SectionHeader,
+  TrustPanel,
+} from '@/components/public/portal-ui';
 
-export const revalidate = 86400; // ISR: 24 horas
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{
@@ -14,17 +22,14 @@ interface PageProps {
   }>;
 }
 
-// Pre-generar los slugs de trámites conocidos para el build
-// Wrapped in try/catch: si la BD no está disponible en build-time,
-// devuelve [] y las páginas se generan on-demand vía ISR.
 export async function generateStaticParams() {
   try {
     const tramites = await prisma.procedimiento.findMany({
       select: { slug: true },
     });
-    return tramites.map((t) => ({ tramite: t.slug }));
+    return tramites.map((tramite) => ({ tramite: tramite.slug }));
   } catch (error) {
-    console.warn('[generateStaticParams] DB no disponible en build-time, fallback a ISR dinámico:', error);
+    console.warn('[generateStaticParams] DB no disponible en build-time, fallback a ISR dinamico:', error);
     return [];
   }
 }
@@ -38,8 +43,8 @@ export async function generateMetadata({ params }: PageProps) {
   if (!tramiteData) return {};
 
   return getMetadata({
-    title: `${tramiteData.title} en el Perú - Requisitos y Sedes por Ciudad`,
-    description: `Conoce los requisitos, costos de la tasa oficial y guía de pasos para tramitar tu ${tramiteData.title}. Selecciona tu ciudad para conocer las sedes de atención físicas locales.`,
+    title: `${tramiteData.title} en el Peru - Requisitos y Sedes por Ciudad`,
+    description: `Conoce requisitos, costos de tasa oficial y pasos para tramitar ${tramiteData.title}. Selecciona tu ciudad para ver sedes locales.`,
     slug: `/tramites/${tramite}`,
   });
 }
@@ -47,7 +52,6 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function Page({ params }: PageProps) {
   const { tramite } = await params;
 
-  // Obtener el trámite y las ciudades asociadas
   const tramiteData = await prisma.procedimiento.findUnique({
     where: { slug: tramite },
     include: {
@@ -65,117 +69,88 @@ export default async function Page({ params }: PageProps) {
 
   if (!tramiteData) notFound();
 
-  const breadcrumbs = [
-    { name: 'Inicio', url: '/' },
-    { name: 'Trámites', url: '/tramites' },
-    { name: tramiteData.title, url: `/tramites/${tramite}` },
-  ];
   const sources = procedureSources[tramiteData.slug] ?? pageSources.tramites;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-50">
-      <main className="container mx-auto px-4 py-12 max-w-5xl">
-        {/* Breadcrumbs */}
-        <nav className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 flex items-center space-x-2 flex-wrap">
-          {breadcrumbs.map((b, i) => (
-            <React.Fragment key={b.url}>
-              {i > 0 && <span className="mx-2 text-slate-300 dark:text-slate-700">/</span>}
-              <a href={b.url} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
-                {b.name}
-              </a>
-            </React.Fragment>
-          ))}
-        </nav>
+    <PortalShell maxWidth="5xl">
+      <Breadcrumbs
+        items={[
+          { name: 'Inicio', url: '/' },
+          { name: 'Tramites', url: '/tramites' },
+          { name: tramiteData.title, url: `/tramites/${tramite}` },
+        ]}
+      />
 
-        {/* Hero Header */}
-        <header className="relative mb-12 rounded-3xl overflow-hidden bg-gradient-to-r from-teal-800 to-cyan-900 text-white p-8 md:p-12 shadow-xl border border-teal-700/20">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-teal-600/30 via-transparent to-transparent pointer-events-none" />
-          <div className="relative z-10 max-w-3xl">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-200 border border-teal-500/30 mb-4 backdrop-blur-sm">
-              Guía de Trámites Oficial
-            </span>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white drop-shadow-sm">
-              Trámite de {tramiteData.title}
-            </h1>
-            <p className="text-lg text-teal-100/90 leading-relaxed">
-              {tramiteData.description}
-            </p>
-          </div>
-        </header>
+      <EditorialHero
+        eyebrow="Guia de tramite"
+        title={`Tramite de ${tramiteData.title}`}
+        description={tramiteData.description}
+        icon={FileText}
+        stats={[
+          { label: 'Ciudades', value: tramiteData.ciudadesRel.length },
+          { label: 'Requisitos', value: tramiteData.requisitos.length },
+          { label: 'Fuentes', value: sources.length },
+        ]}
+      />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main content - general requirements */}
-          <div className="lg:col-span-2 space-y-6">
-            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm">
-              <h2 className="text-xl font-bold mb-4 text-slate-850 dark:text-slate-100 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-teal-500" />
-                Requisitos Generales
-              </h2>
-              <ul className="space-y-3">
-                {tramiteData.requisitos.map((req, idx) => (
-                  <li key={idx} className="flex items-start text-slate-600 dark:text-slate-400 text-sm">
-                    <span className="w-5 h-5 bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 rounded-full flex items-center justify-center shrink-0 mr-2.5 mt-0.5">
-                      <Check className="w-3 h-3" />
-                    </span>
-                    <span>{req}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+        <div className="space-y-8">
+          <EditorialPanel>
+            <SectionHeader title="Requisitos generales" icon={FileText} />
+            <ul className="space-y-3">
+              {tramiteData.requisitos.map((req, index) => (
+                <li key={`${req}-${index}`} className="flex gap-3 text-sm leading-6 text-[#6B7280]">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center bg-[#C8102E] text-white">
+                    <Check className="h-3 w-3" />
+                  </span>
+                  <span>{req}</span>
+                </li>
+              ))}
+            </ul>
+          </EditorialPanel>
 
-            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100">
-                Antes de iniciar este trámite
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                <div className="rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 p-4">
-                  Revisa si el pago se hace con código de tasa, plataforma oficial o entidad bancaria autorizada. Evita depositar a cuentas personales o aceptar intermediarios.
-                </div>
-                <div className="rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 p-4">
-                  Guarda la constancia de pago, la cita y el número de solicitud. Esos datos suelen ser necesarios para consultar estado, reprogramar o recoger documentos.
-                </div>
+          <EditorialPanel>
+            <SectionHeader title="Antes de iniciar este tramite" icon={ShieldCheck} />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="border border-[#E8E4DE] bg-[#F8F5F0] p-4 text-sm leading-6 text-[#6B7280]">
+                Revisa si el pago se hace con codigo de tasa, plataforma oficial o entidad bancaria autorizada.
               </div>
-            </section>
-          </div>
-
-          {/* Sidebar - Choose City */}
-          <aside className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 rounded-3xl shadow-sm">
-              <h3 className="font-bold text-lg mb-4 text-slate-850 dark:text-slate-100 flex items-center">
-                <MapPin className="w-5 h-5 mr-2 text-teal-500" />
-                Sedes y Horarios por Ciudad
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                Selecciona una ciudad para consultar las oficinas locales, costos TUPA y pasos específicos de tramitación.
-              </p>
-              <ul className="space-y-2">
-                {tramiteData.ciudadesRel.map((rel) => (
-                  <li key={rel.ciudad.id}>
-                    <a
-                      href={`/tramites/${tramite}/${rel.ciudad.slug}`}
-                      className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 hover:bg-teal-500/5 hover:border-teal-500/30 transition-all group"
-                    >
-                      <div>
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                          {rel.ciudad.name}
-                        </span>
-                        <span className="block text-[10px] text-slate-400 dark:text-slate-500">
-                          Tasa oficial: S/ {rel.costo.toFixed(2)}
-                        </span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-350 dark:text-slate-650 group-hover:text-teal-500 dark:group-hover:text-teal-400 transition-transform group-hover:translate-x-1" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <div className="border border-[#E8E4DE] bg-[#F8F5F0] p-4 text-sm leading-6 text-[#6B7280]">
+                Guarda constancia de pago, cita y numero de solicitud para consultar estado o recoger documentos.
+              </div>
             </div>
-            <SourceList
-              title="Fuente principal del trámite"
-              sources={sources}
-            />
-          </aside>
+          </EditorialPanel>
         </div>
-      </main>
-    </div>
+
+        <aside className="space-y-6">
+          <EditorialPanel>
+            <SectionHeader title="Sedes y horarios por ciudad" icon={MapPin} />
+            <p className="mb-4 text-xs leading-6 text-[#6B7280]">
+              Selecciona una ciudad para consultar costos, sedes y pasos especificos.
+            </p>
+            <div className="space-y-2">
+              {tramiteData.ciudadesRel.map((rel) => (
+                <LinkCard
+                  key={rel.ciudad.id}
+                  href={`/tramites/${tramite}/${rel.ciudad.slug}`}
+                  title={rel.ciudad.name}
+                  description={`Tasa oficial: S/ ${rel.costo.toFixed(2)}`}
+                  meta={rel.ciudad.departamento.name}
+                  icon={MapPin}
+                />
+              ))}
+            </div>
+          </EditorialPanel>
+
+          <TrustPanel
+            title="Gestion sin intermediarios"
+            description="Verifica los datos oficiales antes de pagar o acudir a una sede."
+            items={['Revisa requisitos.', 'Confirma tasa oficial.', 'Guarda constancias.']}
+          />
+
+          <SourceList title="Fuente principal del tramite" sources={sources} />
+        </aside>
+      </div>
+    </PortalShell>
   );
 }

@@ -1,9 +1,8 @@
-// src/components/salud/ciudades-list.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { MapPin, ChevronRight, Search, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { AlertCircle, ArrowRight, MapPin, Search } from 'lucide-react';
 
 interface Ciudad {
   id: string;
@@ -24,65 +23,56 @@ interface CiudadesListProps {
 export function CiudadesList({ initialCiudades }: CiudadesListProps) {
   const [search, setSearch] = useState('');
 
-  // Filter cities by search term
-  const filteredCiudades = initialCiudades.filter((c) => 
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.departamento.name.toLowerCase().includes(search.toLowerCase())
+  const filteredCiudades = initialCiudades.filter(
+    (city) =>
+      city.name.toLowerCase().includes(search.toLowerCase()) ||
+      city.departamento.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="space-y-6">
-      
-      {/* Caja de Búsqueda de Ciudades */}
+    <div className="space-y-5">
       <div className="relative">
-        <Search className="absolute left-4 top-3.5 w-4.5 h-4.5 text-slate-450 dark:text-slate-500" />
+        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C8102E]" />
         <input
           type="text"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Escribe el nombre de tu ciudad o región (Ej. Lima, Arequipa, Piura)..."
-          className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-hidden focus:border-teal-500 dark:focus:border-teal-400 focus:ring-1 focus:ring-teal-500 transition-all placeholder-slate-400 dark:placeholder-slate-500"
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Buscar ciudad o region"
+          className="w-full border border-[#E8E4DE] bg-[#F8F5F0] py-3 pl-11 pr-4 text-sm text-[#1A1A2E] outline-none transition placeholder:text-[#6B7280]/70 focus:border-[#C8102E] focus:bg-white"
         />
       </div>
 
-      {/* Grid de Ciudades */}
       {filteredCiudades.length === 0 ? (
-        <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-850 rounded-2xl p-10 text-center space-y-3">
-          <AlertCircle className="w-10 h-10 text-slate-400 mx-auto" />
-          <h3 className="font-heading text-sm font-bold text-slate-900 dark:text-white">
-            No se encontraron ciudades
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-450">
-            Intenta buscando otra región o revisa la ortografía de la consulta.
-          </p>
+        <div className="border border-[#E8E4DE] bg-[#F8F5F0] p-8 text-center">
+          <AlertCircle className="mx-auto h-9 w-9 text-[#C8102E]" />
+          <h3 className="mt-3 font-heading text-lg font-bold text-[#1A1A2E]">No se encontraron ciudades</h3>
+          <p className="mt-2 text-sm leading-6 text-[#6B7280]">Prueba con otra ciudad o region.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredCiudades.map((c) => (
+        <div className="grid gap-3 md:grid-cols-2">
+          {filteredCiudades.map((city) => (
             <Link
-              key={c.id}
-              href={`/hospitales/${c.slug}`}
-              className="group flex items-center justify-between p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 hover:border-teal-500/40 dark:hover:border-teal-500/40 hover:bg-slate-50 dark:hover:bg-slate-850/20 transition-all duration-300"
+              key={city.id}
+              href={`/hospitales/${city.slug}`}
+              className="group relative flex items-center gap-4 border border-[#E8E4DE] bg-white p-4 shadow-[0_1px_3px_rgba(10,15,30,.08)] transition hover:-translate-y-0.5 hover:border-[#C8102E]/40 hover:shadow-[0_8px_24px_rgba(10,15,30,.14)]"
             >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/45 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-850 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                    {c.name}
-                  </h3>
-                  <span className="text-xs text-slate-500 dark:text-slate-450 block">
-                    Región {c.departamento.name} • {c.hospitales.length} centros de salud
-                  </span>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-700 group-hover:text-teal-500 dark:group-hover:text-teal-400 shrink-0 transition-transform group-hover:translate-x-1" />
+              <span className="absolute inset-y-0 left-0 w-[3px] origin-bottom scale-y-0 bg-[#C8102E] transition group-hover:scale-y-100" />
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-[#0A0F1E] text-white transition group-hover:bg-[#C8102E]">
+                <MapPin className="h-5 w-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-heading text-lg font-bold leading-tight text-[#1A1A2E] transition group-hover:text-[#C8102E]">
+                  {city.name}
+                </span>
+                <span className="mt-1 block text-xs text-[#6B7280]">
+                  {city.departamento.name} | {city.hospitales.length} centros de salud
+                </span>
+              </span>
+              <ArrowRight className="h-4 w-4 text-[#C8102E] transition group-hover:translate-x-1" />
             </Link>
           ))}
         </div>
       )}
-
     </div>
   );
 }

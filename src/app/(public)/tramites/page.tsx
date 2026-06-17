@@ -1,191 +1,168 @@
-import React from 'react';
+import { BookOpen, FileText, HelpCircle, Landmark, MapPin } from 'lucide-react';
 import { prisma } from '@/lib/db';
 import { getMetadata } from '@/lib/seo';
 import { SourceList } from '@/components/common/source-list';
 import { editorialImages, pageSources } from '@/lib/editorial-sources';
-import { FileText, MapPin, ChevronRight, HelpCircle } from 'lucide-react';
+import {
+  Breadcrumbs,
+  EditorialHero,
+  EditorialPanel,
+  LinkCard,
+  PortalShell,
+  SectionHeader,
+  TrustPanel,
+} from '@/components/public/portal-ui';
 
-export const revalidate = 86400; // ISR: 24 horas
+export const revalidate = 86400;
 
 export async function generateMetadata() {
   return getMetadata({
-    title: 'Directorio de Trámites y Guías TUPA - Perú',
-    description: 'Encuentra guías paso a paso de los trámites públicos más buscados en el Perú (RENIEC, MTC, SUNAT). Requisitos, costos oficiales del TUPA y sedes por ciudad.',
+    title: 'Directorio de Tramites y Guias TUPA - Peru',
+    description: 'Encuentra guias paso a paso de los tramites publicos mas buscados en el Peru. Requisitos, costos oficiales y sedes por ciudad.',
     slug: '/tramites',
   });
 }
 
 export default async function Page() {
-  // Obtener todos los trámites
-  const tramites = await prisma.procedimiento.findMany({
-    orderBy: { title: 'asc' },
-  });
-
-  // Obtener todas las ciudades activas
-  const ciudades = await prisma.ciudad.findMany({
-    include: {
-      departamento: true,
-      procedimientos: true,
-    },
-    orderBy: { name: 'asc' },
-  });
-
-  const breadcrumbs = [
-    { name: 'Inicio', url: '/' },
-    { name: 'Trámites', url: '/tramites' },
-  ];
+  const [tramites, ciudades] = await Promise.all([
+    prisma.procedimiento.findMany({ orderBy: { title: 'asc' } }),
+    prisma.ciudad.findMany({
+      include: {
+        departamento: true,
+        procedimientos: true,
+      },
+      orderBy: { name: 'asc' },
+    }),
+  ]);
 
   const officialGuides = [
     {
       title: 'Identidad y documentos',
-      text: 'Incluye duplicado de DNI, pasaporte electrónico y recomendaciones para revisar pagos, estado de solicitud y canales oficiales antes del recojo.',
+      text: 'DNI, pasaporte, certificados y pagos asociados a documentos personales.',
     },
     {
       title: 'Licencias y registros',
-      text: 'Resume requisitos de la licencia A-I, inscripción al RUC, certificados registrales y pasos que dependen de evaluaciones o validaciones previas.',
+      text: 'Brevete, RUC, certificados registrales y validaciones previas.',
     },
     {
       title: 'Salud y empleo ciudadano',
-      text: 'Integra trámites de afiliación SIS y Certificado Único Laboral para conectar necesidades frecuentes con servicios gratuitos del Estado.',
+      text: 'Afiliacion SIS, Certificado Unico Laboral y servicios gratuitos del Estado.',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-50">
-      <main className="container mx-auto px-4 py-12 max-w-6xl">
-        {/* Breadcrumbs */}
-        <nav className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 flex items-center space-x-2 flex-wrap">
-          {breadcrumbs.map((b, i) => (
-            <React.Fragment key={b.url}>
-              {i > 0 && <span className="mx-2 text-slate-300 dark:text-slate-700">/</span>}
-              <a href={b.url} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
-                {b.name}
-              </a>
-            </React.Fragment>
-          ))}
-        </nav>
+    <PortalShell>
+      <Breadcrumbs
+        items={[
+          { name: 'Inicio', url: '/' },
+          { name: 'Tramites', url: '/tramites' },
+        ]}
+      />
 
-        {/* Hero Header */}
-        <header className="relative mb-12 rounded-3xl overflow-hidden bg-gradient-to-r from-teal-800 to-cyan-900 text-white p-8 md:p-12 shadow-xl border border-teal-700/20">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-teal-600/30 via-transparent to-transparent pointer-events-none" />
-          <div className="relative z-10 max-w-3xl">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-200 border border-teal-500/30 mb-4 backdrop-blur-sm">
-              TUPA Nacional
-            </span>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white drop-shadow-sm">
-              Guías de Trámites del Estado Peruano
-            </h1>
-            <p className="text-lg text-teal-100/90 leading-relaxed">
-              Consulta los requisitos, tasas de pago oficiales y las sedes de atención autorizadas para realizar tus gestiones públicas de forma rápida y sencilla.
-            </p>
-          </div>
-        </header>
+      <EditorialHero
+        eyebrow="TUPA nacional"
+        title="Guias de tramites del Estado Peruano"
+        description="Consulta requisitos, tasas oficiales y sedes autorizadas para realizar gestiones publicas con menos friccion y sin intermediarios."
+        icon={Landmark}
+        stats={[
+          { label: 'Guias', value: tramites.length },
+          { label: 'Ciudades', value: ciudades.length },
+          { label: 'Fuentes', value: pageSources.tramites.length },
+        ]}
+      />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* List of Procedures */}
-          <div className="lg:col-span-2 space-y-8">
-            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-6">
-              <h2 className="text-2xl font-bold tracking-tight flex items-center">
-                <FileText className="w-6 h-6 mr-2.5 text-teal-500" />
-                Trámites Disponibles
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {tramites.map((t) => (
-                  <a
-                    key={t.id}
-                    href={`/tramites/${t.slug}/lima`}
-                    className="group flex items-start p-4 rounded-2xl border border-slate-100 dark:border-slate-850 dark:border-slate-800 hover:border-teal-500/40 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all duration-300"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/45 text-teal-600 dark:text-teal-400 flex items-center justify-center mr-3 shrink-0">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-slate-850 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                        {t.title}
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-                        {t.description}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-700 group-hover:text-teal-500 dark:group-hover:text-teal-400 self-center ml-2 shrink-0 transition-transform group-hover:translate-x-1" />
-                  </a>
-                ))}
-              </div>
-            </section>
-
-            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-5">
-              <h2 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100">
-                Guías oficiales priorizadas
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {officialGuides.map((guide) => (
-                  <article key={guide.title} className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 p-4">
-                    <h3 className="text-sm font-bold text-slate-850 dark:text-slate-100">{guide.title}</h3>
-                    <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{guide.text}</p>
-                  </article>
-                ))}
-              </div>
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                Cada guía se redacta como orientación ciudadana: separa requisitos, pagos, pasos y puntos de alerta para evitar cobros indebidos, intermediarios no autorizados o errores comunes al reservar una cita.
-              </p>
-            </section>
-
-            {/* General state procedures information to prevent thin content */}
-            <section className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 md:p-8 rounded-3xl shadow-sm space-y-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-850 dark:text-slate-100 flex items-center">
-                <HelpCircle className="w-5 h-5 mr-2 text-teal-500" />
-                ¿Qué es el TUPA en el Perú?
-              </h2>
-              <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
-                <p>
-                  El <strong>Texto Único de Procedimientos Administrativos (TUPA)</strong> es el documento unificado que compila todos los trámites requeridos ante cualquier entidad del Estado Peruano (como ministerios, municipalidades o dependencias autónomas).
-                </p>
-                <p>
-                  En el TUPA se especifican con carácter legal los requisitos obligatorios, el costo de las tasas de pago oficiales (basadas en la Unidad Impositiva Tributaria - UIT), los plazos de aprobación automática o evaluación previa, y las oficinas de recojo habilitadas.
-                </p>
-              </div>
-            </section>
-          </div>
-
-          {/* Sidebar - Enter by City */}
-          <aside className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 rounded-3xl shadow-sm">
-              <h3 className="font-bold text-lg mb-4 text-slate-850 dark:text-slate-100 flex items-center">
-                <MapPin className="w-5 h-5 mr-2 text-teal-500" />
-                Buscar por Ubicación
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                Selecciona tu provincia o región para conocer las sedes de atención físicas locales, horarios y tasas regionales de pago.
-              </p>
-              <ul className="space-y-2">
-                {ciudades.map((c) => (
-                  <li key={c.id}>
-                    <a
-                      href={`/tramites/licencia-de-conducir/${c.slug}`}
-                      className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 hover:bg-teal-500/5 hover:border-teal-500/30 transition-all group"
-                    >
-                      <div>
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                          {c.name}
-                        </span>
-                        <span className="block text-[10px] text-slate-400 dark:text-slate-500">
-                          Región: {c.departamento.name}
-                        </span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-350 dark:text-slate-650 group-hover:text-teal-500 dark:group-hover:text-teal-400 transition-transform group-hover:translate-x-1" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <SourceList
-              title="Fuentes oficiales de trámites"
-              sources={pageSources.tramites}
-              image={editorialImages.tramites}
+      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+        <div className="space-y-8">
+          <EditorialPanel>
+            <SectionHeader
+              title="Tramites disponibles"
+              description="Accesos directos a guias gestionadas desde el CMS y la base de datos."
+              icon={FileText}
             />
-          </aside>
+            <div className="grid gap-4 md:grid-cols-2">
+              {tramites.map((tramite) => (
+                <LinkCard
+                  key={tramite.id}
+                  href={`/tramites/${tramite.slug}/lima`}
+                  title={tramite.title}
+                  description={tramite.description}
+                  meta="Guia oficial"
+                  icon={FileText}
+                />
+              ))}
+            </div>
+          </EditorialPanel>
+
+          <EditorialPanel>
+            <SectionHeader title="Guias oficiales priorizadas" icon={BookOpen} />
+            <div className="grid gap-4 md:grid-cols-3">
+              {officialGuides.map((guide) => (
+                <article key={guide.title} className="border border-[#E8E4DE] bg-[#F8F5F0] p-4">
+                  <h3 className="font-heading text-lg font-bold text-[#1A1A2E]">{guide.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#6B7280]">{guide.text}</p>
+                </article>
+              ))}
+            </div>
+            <p className="mt-5 text-sm leading-7 text-[#6B7280]">
+              Cada guia separa requisitos, pagos, pasos y alertas para evitar cobros indebidos,
+              intermediarios no autorizados o errores comunes al reservar citas.
+            </p>
+          </EditorialPanel>
+
+          <EditorialPanel>
+            <SectionHeader title="Que es el TUPA en el Peru" icon={HelpCircle} />
+            <div className="space-y-4 text-sm leading-7 text-[#6B7280]">
+              <p>
+                El Texto Unico de Procedimientos Administrativos organiza los tramites de cada entidad
+                publica, sus requisitos, costos, plazos y canales de atencion.
+              </p>
+              <p>
+                Antes de pagar una tasa, verifica el concepto, el codigo de pago y la entidad autorizada.
+                Guarda constancias, numero de solicitud y datos de cita hasta finalizar el tramite.
+              </p>
+            </div>
+          </EditorialPanel>
         </div>
-      </main>
-    </div>
+
+        <aside className="space-y-6">
+          <TrustPanel
+            title="Evita tramitadores y pagos no oficiales"
+            description="Las guias estan pensadas para ayudarte a revisar fuentes oficiales antes de iniciar cualquier gestion."
+            items={[
+              'Confirma tasas en canales oficiales.',
+              'No deposites a cuentas personales.',
+              'Conserva tu constancia y codigo de solicitud.',
+            ]}
+          />
+
+          <EditorialPanel>
+            <SectionHeader title="Buscar por ubicacion" icon={MapPin} />
+            <p className="mb-4 text-xs leading-6 text-[#6B7280]">
+              Selecciona una ciudad para revisar servicios frecuentes y sedes disponibles.
+            </p>
+            <div className="space-y-2">
+              {ciudades.map((ciudad) => (
+                <LinkCard
+                  key={ciudad.id}
+                  href={`/tramites/licencia-de-conducir/${ciudad.slug}`}
+                  title={ciudad.name}
+                  description={ciudad.departamento.name}
+                  meta="Ciudad"
+                  icon={MapPin}
+                />
+              ))}
+            </div>
+          </EditorialPanel>
+
+          <TrustPanel
+            title="Consulta con criterio"
+            description="ClavePeru organiza informacion publica; la entidad oficial siempre tiene la decision final sobre tasas, plazos y disponibilidad."
+            items={['Verifica fecha de actualizacion.', 'Revisa requisitos antes de ir a sede.']}
+          />
+
+          <SourceList title="Fuentes oficiales de tramites" sources={pageSources.tramites} image={editorialImages.tramites} />
+        </aside>
+      </div>
+    </PortalShell>
   );
 }

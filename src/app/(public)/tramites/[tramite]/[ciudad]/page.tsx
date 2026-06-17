@@ -1,5 +1,5 @@
-// src/app/(public)/tramites/[tramite]/[ciudad]/page.tsx
 import { notFound } from 'next/navigation';
+import { Check, FileText, Landmark, MapPin, ShieldCheck } from 'lucide-react';
 import { getMetadata } from '@/lib/seo';
 import { prisma } from '@/lib/db';
 import { StructuredData } from '@/components/common/structured-data';
@@ -7,11 +7,17 @@ import { LinkAutomatico } from '@/components/common/link-automatico';
 import { SimuladorExamen } from '@/modules/tramites/components/simulador-examen';
 import { SourceList } from '@/components/common/source-list';
 import { pageSources, procedureSources } from '@/lib/editorial-sources';
-import Link from 'next/link';
+import {
+  Badge,
+  Breadcrumbs,
+  EditorialHero,
+  EditorialPanel,
+  PortalShell,
+  SectionHeader,
+  TrustPanel,
+} from '@/components/public/portal-ui';
 
-
-
-export const revalidate = 86400; // ISR: Regenerar cada 24 horas
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{
@@ -20,7 +26,6 @@ interface PageProps {
   }>;
 }
 
-// No pre-renderizar en build (las páginas se generan on-demand vía ISR)
 export async function generateStaticParams() {
   return [];
 }
@@ -38,7 +43,7 @@ export async function generateMetadata({ params }: PageProps) {
 
   return getMetadata({
     title: `${tramiteData.title} en ${ciudadData.name} - Requisitos y Sedes`,
-    description: `Guía paso a paso para tramitar ${tramiteData.title} en ${ciudadData.name}. Conoce los requisitos oficiales, costos (TUPA), direcciones de sedes y horarios de atención actualizados.`,
+    description: `Guia paso a paso para tramitar ${tramiteData.title} en ${ciudadData.name}. Conoce requisitos, costos TUPA, direcciones y horarios.`,
     slug: `/tramites/${tramite}/${ciudad}`,
   });
 }
@@ -46,7 +51,6 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function Page({ params }: PageProps) {
   const { tramite, ciudad } = await params;
 
-  // Cargar datos consolidados de la base de datos relacional
   const data = await prisma.procedimientoCiudad.findFirst({
     where: {
       procedimiento: { slug: tramite },
@@ -61,16 +65,13 @@ export default async function Page({ params }: PageProps) {
 
   if (!data) notFound();
 
-  // Mapear arrays seguros para el renderizado
   const requisitos = data.procedimiento.requisitos || [];
-  
-  // Tipar dinámicamente campos JSON guardados en Postgres
   const pasos = (data.pasos as unknown as Array<{ titulo: string; descripcion: string }>) || [];
   const faqRaw = (data.faq as unknown as Array<{ question: string; answer: string }>) || [];
 
   const breadcrumbs = [
     { name: 'Inicio', url: '/' },
-    { name: 'Trámites', url: '/tramites' },
+    { name: 'Tramites', url: '/tramites' },
     { name: data.procedimiento.title, url: `/tramites/${data.procedimiento.slug}` },
     { name: data.ciudad.name, url: `/tramites/${data.procedimiento.slug}/${data.ciudad.slug}` },
   ];
@@ -81,142 +82,139 @@ export default async function Page({ params }: PageProps) {
       <StructuredData type="Breadcrumb" data={breadcrumbs} />
       {faqRaw.length > 0 && <StructuredData type="FAQ" data={faqRaw} />}
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Breadcrumb Visual */}
-        <nav className="text-xs text-slate-500 mb-6 flex items-center gap-2 overflow-x-auto whitespace-nowrap">
-          {breadcrumbs.map((b, i) => (
-            <span key={b.url} className="flex items-center gap-2">
-              {i > 0 && <span className="text-slate-400">/</span>}
-              <Link href={b.url} className="hover:text-primary transition-colors">
-                {b.name}
-              </Link>
-            </span>
-          ))}
-        </nav>
+      <PortalShell>
+        <Breadcrumbs items={breadcrumbs} />
 
-        {/* Hero Section */}
-        <header className="mb-8">
-          <span className="inline-block bg-primary/10 text-primary text-xs font-semibold px-3, py-1 rounded-full mb-3">
-            Trámites en {data.ciudad.name}
-          </span>
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-            Cómo tramitar {data.procedimiento.title} en {data.ciudad.name}
-          </h1>
-          <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 max-w-3xl">
-            {data.procedimiento.description}
-          </p>
-        </header>
+        <EditorialHero
+          eyebrow={`Tramites en ${data.ciudad.name}`}
+          title={`Como tramitar ${data.procedimiento.title} en ${data.ciudad.name}`}
+          description={data.procedimiento.description}
+          icon={Landmark}
+          stats={[
+            { label: 'Costo', value: `S/ ${data.costo.toFixed(2)}` },
+            { label: 'Sedes', value: data.sedes.length },
+            { label: 'Pasos', value: pasos.length || 'Info' },
+          ]}
+        />
 
-        {/* Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Info */}
-          <div className="lg:col-span-2 space-y-8">
-            <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Requisitos obligatorios</h2>
+        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-8">
+            <EditorialPanel>
+              <SectionHeader title="Requisitos obligatorios" icon={FileText} />
               {requisitos.length > 0 ? (
                 <ul className="space-y-3">
-                  {requisitos.map((req, idx) => (
-                    <li key={idx} className="flex gap-3 text-slate-600 dark:text-slate-300">
-                      <span className="text-primary font-bold">✓</span>
+                  {requisitos.map((req, index) => (
+                    <li key={`${req}-${index}`} className="flex gap-3 text-sm leading-6 text-[#6B7280]">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center bg-[#C8102E] text-white">
+                        <Check className="h-3 w-3" />
+                      </span>
                       <span>{req}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-slate-500 text-sm">No se requieren requisitos previos complejos.</p>
+                <p className="text-sm leading-6 text-[#6B7280]">No se requieren requisitos previos complejos.</p>
               )}
-            </section>
+            </EditorialPanel>
 
-            {/* Pasos de Tramitación */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Guía paso a paso</h2>
+            <section>
+              <SectionHeader title="Guia paso a paso" description={`Orden recomendado para completar el tramite en ${data.ciudad.name}.`} />
               <div className="space-y-4">
                 {pasos.length > 0 ? (
-                  pasos.map((p, idx) => (
-                    <div key={idx} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex gap-4 shadow-xs">
-                      <div className="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm">
-                        {idx + 1}
-                      </div>
+                  pasos.map((step, index) => (
+                    <article key={`${step.titulo}-${index}`} className="flex gap-4 border border-[#E8E4DE] bg-white p-5 shadow-[0_1px_3px_rgba(10,15,30,.08)]">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center bg-[#C8102E] font-heading text-lg font-black text-white">
+                        {index + 1}
+                      </span>
                       <div>
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{p.titulo}</h3>
-                        <p className="mt-2 text-slate-600 dark:text-slate-300 text-sm">{p.descripcion}</p>
+                        <h3 className="font-heading text-xl font-bold text-[#1A1A2E]">{step.titulo}</h3>
+                        <p className="mt-2 text-sm leading-6 text-[#6B7280]">{step.descripcion}</p>
                       </div>
-                    </div>
+                    </article>
                   ))
                 ) : (
-                  <p className="text-slate-500 text-sm">Consulte directamente en las oficinas locales descritas en la columna lateral.</p>
+                  <EditorialPanel>
+                    <p className="text-sm leading-6 text-[#6B7280]">
+                      Consulta directamente en las oficinas locales descritas o en el portal oficial correspondiente.
+                    </p>
+                  </EditorialPanel>
                 )}
               </div>
             </section>
 
-            <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm space-y-4">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Verificación antes de pagar</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-600 dark:text-slate-300">
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-4">
-                  Confirma el código o concepto de pago en el portal oficial.
-                </div>
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-4">
-                  Revisa si la cita es obligatoria para la sede de {data.ciudad.name}.
-                </div>
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-4">
-                  Conserva constancias y número de solicitud hasta finalizar el trámite.
-                </div>
+            <EditorialPanel>
+              <SectionHeader title="Verificacion antes de pagar" icon={ShieldCheck} />
+              <div className="grid gap-4 md:grid-cols-3">
+                {[
+                  'Confirma el codigo o concepto de pago en el portal oficial.',
+                  `Revisa si la cita es obligatoria para la sede de ${data.ciudad.name}.`,
+                  'Conserva constancias y numero de solicitud hasta finalizar el tramite.',
+                ].map((item) => (
+                  <div key={item} className="border border-[#E8E4DE] bg-[#F8F5F0] p-4 text-sm leading-6 text-[#6B7280]">
+                    {item}
+                  </div>
+                ))}
               </div>
-            </section>
+            </EditorialPanel>
 
-            {/* Simulador Interactivo Exclusivo para Licencia de Conducir (Brevete) */}
             {data.procedimiento.slug === 'licencia-de-conducir' && (
-              <section className="space-y-4">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Simulador de Examen de Reglas MTC</h2>
-                <p className="text-slate-500 text-sm">
-                  Pon a prueba tus conocimientos sobre la normativa de tránsito peruana antes de rendir el examen oficial del Touring en {data.ciudad.name}.
+              <EditorialPanel>
+                <SectionHeader title="Simulador de examen de reglas MTC" />
+                <p className="mb-5 text-sm leading-6 text-[#6B7280]">
+                  Practica antes de rendir el examen oficial en {data.ciudad.name}.
                 </p>
                 <SimuladorExamen />
-              </section>
+              </EditorialPanel>
             )}
 
-            {/* Enlazado Interno Inteligente */}
-            <section className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60 p-6 rounded-2xl">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Otros trámites útiles en {data.ciudad.name}</h3>
+            <EditorialPanel>
+              <SectionHeader title={`Otros tramites utiles en ${data.ciudad.name}`} />
               <LinkAutomatico type="tramites" ciudadSlug={data.ciudad.slug} excludeSlug={data.procedimiento.slug} />
-            </section>
+            </EditorialPanel>
           </div>
 
-          {/* Sidebar / Sedes de Atención */}
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Costos y Oficinas</h3>
-              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-800 mb-6">
-                <span className="text-xs text-slate-500 block">Costo según el TUPA regional:</span>
-                <span className="text-3xl font-extrabold text-primary">S/ {data.costo.toFixed(2)}</span>
+          <aside className="space-y-6">
+            <EditorialPanel>
+              <SectionHeader title="Costos y oficinas" icon={MapPin} />
+              <div className="mb-5 border border-[#E8E4DE] bg-[#F8F5F0] p-4">
+                <span className="block font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
+                  Costo segun TUPA
+                </span>
+                <span className="mt-1 block font-heading text-4xl font-black text-[#C8102E]">
+                  S/ {data.costo.toFixed(2)}
+                </span>
               </div>
 
-              <h4 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider mb-3">
-                Sedes Físicas en {data.ciudad.name}
-              </h4>
+              <h3 className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1A1A2E]">
+                Sedes fisicas en {data.ciudad.name}
+              </h3>
               <div className="space-y-4">
                 {data.sedes.length > 0 ? (
-                  data.sedes.map((s) => (
-                    <div key={s.id} className="border-t border-slate-100 dark:border-slate-800 pt-4 first:border-t-0 first:pt-0">
-                      <h5 className="font-semibold text-slate-900 dark:text-white text-sm">{s.nombre}</h5>
-                      <p className="text-xs text-slate-500 mt-1">{s.direccion}</p>
-                      <span className="inline-block bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] px-2 py-0.5 rounded mt-2">
-                        {s.horario}
-                      </span>
+                  data.sedes.map((sede) => (
+                    <div key={sede.id} className="border-t border-[#E8E4DE] pt-4 first:border-t-0 first:pt-0">
+                      <h4 className="font-heading text-lg font-bold text-[#1A1A2E]">{sede.nombre}</h4>
+                      <p className="mt-1 text-xs leading-5 text-[#6B7280]">{sede.direccion}</p>
+                      <Badge>{sede.horario}</Badge>
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-slate-500">No hay sedes presenciales especificadas. Este trámite se realiza mayoritariamente de manera virtual.</p>
+                  <p className="text-xs leading-6 text-[#6B7280]">
+                    No hay sedes presenciales especificadas. Este tramite puede ser mayoritariamente virtual.
+                  </p>
                 )}
               </div>
-            </div>
-            <SourceList
-              title="Fuente oficial consultada"
-              sources={sources}
+            </EditorialPanel>
+
+            <TrustPanel
+              title="Atencion antes de iniciar"
+              description="La entidad oficial puede cambiar plazos, horarios o disponibilidad. Confirma antes de trasladarte."
+              items={['Revisa fuente oficial.', 'No pagues a intermediarios.', 'Guarda constancias.']}
             />
-          </div>
+
+            <SourceList title="Fuente oficial consultada" sources={sources} />
+          </aside>
         </div>
-      </main>
+      </PortalShell>
     </>
   );
 }

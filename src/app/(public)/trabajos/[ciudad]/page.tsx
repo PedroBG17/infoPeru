@@ -1,14 +1,22 @@
-import React from 'react';
 import { notFound } from 'next/navigation';
+import { ArrowRight, Briefcase, Building, Calendar, DollarSign, MapPin, UserPlus } from 'lucide-react';
 import { getMetadata } from '@/lib/seo';
 import { getCiudadBySlug, getJobsByCiudad, SECTORES } from '@/modules/empleo/services';
 import { StructuredData } from '@/components/common/structured-data';
 import { LinkAutomatico } from '@/components/common/link-automatico';
 import { SourceList } from '@/components/common/source-list';
 import { editorialImages, pageSources } from '@/lib/editorial-sources';
-import { Briefcase, MapPin, Calendar, DollarSign, Building, ArrowRight, UserPlus, CheckCircle } from 'lucide-react';
+import {
+  Badge,
+  Breadcrumbs,
+  EditorialHero,
+  EditorialPanel,
+  PortalShell,
+  SectionHeader,
+  TrustPanel,
+} from '@/components/public/portal-ui';
 
-export const revalidate = 86400; // ISR: Regenerar cada 24 horas
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{
@@ -16,7 +24,6 @@ interface PageProps {
   }>;
 }
 
-// No pre-renderizar en build (las páginas se generan on-demand vía ISR)
 export async function generateStaticParams() {
   return [];
 }
@@ -29,7 +36,7 @@ export async function generateMetadata({ params }: PageProps) {
 
   return getMetadata({
     title: `Bolsa de Trabajo en ${ciudadData.name} - Empleos Disponibles`,
-    description: `Encuentra las mejores ofertas de trabajo y vacantes de empleo en ${ciudadData.name}. Postula hoy mismo a puestos en administración, minería, comercio, salud e ingeniería en la región.`,
+    description: `Encuentra ofertas de trabajo y vacantes en ${ciudadData.name}. Postula a puestos en administracion, mineria, comercio, salud e ingenieria.`,
     slug: `/trabajos/${ciudad}`,
   });
 }
@@ -45,16 +52,14 @@ export default async function Page({ params }: PageProps) {
   const breadcrumbs = [
     { name: 'Inicio', url: '/' },
     { name: 'Directorios', url: '/directorios' },
-    { name: 'Bolsa de Empleo', url: '/trabajos' },
+    { name: 'Empleo', url: '/trabajos' },
     { name: ciudadData.name, url: `/trabajos/${ciudad}` },
   ];
 
   return (
     <>
-      {/* 1. Datos Estructurados de Navegación */}
       <StructuredData type="Breadcrumb" data={breadcrumbs} />
 
-      {/* 2. Datos Estructurados para Google Jobs */}
       {trabajos.map((job) => {
         const jobData = {
           title: job.title,
@@ -66,259 +71,229 @@ export default async function Page({ params }: PageProps) {
           region: ciudadData.departamento.name,
           type: job.type,
           jobId: job.id,
-          datePosted: new Date(Date.now() - job.postedDaysAgo * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split('T')[0],
+          datePosted: new Date(Date.now() - job.postedDaysAgo * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           salaryText: job.salaryRange.includes('S/') ? job.salaryRange.match(/\d+,\d+|\d+/)?.[0]?.replace(',', '') : undefined,
         };
         return <StructuredData key={job.id} type="JobPosting" data={jobData} />;
       })}
 
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-50">
-        <main className="container mx-auto px-4 py-12 max-w-7xl">
-          {/* Breadcrumbs */}
-          <nav className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 flex items-center space-x-2 flex-wrap">
-            {breadcrumbs.map((b, i) => (
-              <React.Fragment key={b.url}>
-                {i > 0 && <span className="mx-2 text-slate-300 dark:text-slate-700">/</span>}
-                <a href={b.url} className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
-                  {b.name}
-                </a>
-              </React.Fragment>
-            ))}
-          </nav>
+      <PortalShell maxWidth="7xl">
+        <Breadcrumbs items={breadcrumbs} />
 
-          {/* Hero Header Banner */}
-          <header className="relative mb-12 rounded-3xl overflow-hidden bg-gradient-to-r from-amber-700 to-rose-900 text-white p-8 md:p-12 shadow-xl border border-amber-600/20">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/30 via-transparent to-transparent pointer-events-none" />
-            <div className="relative z-10 max-w-3xl">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-200 border border-amber-500/30 mb-4 backdrop-blur-sm">
-                Bolsa de Empleo • Regional Perú
-              </span>
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white drop-shadow-sm">
-                Ofertas de Trabajo en {ciudadData.name}
-              </h1>
-              <p className="text-lg text-amber-100/90 leading-relaxed mb-6">
-                Descubre vacantes de trabajo disponibles hoy mismo en {ciudadData.name}. Conéctate con las mejores empresas locales y postula en línea a empleos formales en diversos rubros comerciales e industriales.
-              </p>
-              <div className="flex flex-wrap gap-4 text-sm text-amber-200">
-                <div className="flex items-center space-x-2 bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-700/30">
-                  <Briefcase className="w-4 h-4 text-amber-400" />
-                  <span>Empleo Formal y Practicantes</span>
+        <EditorialHero
+          eyebrow="Bolsa de empleo regional"
+          title={`Ofertas de trabajo en ${ciudadData.name}`}
+          description={`Convocatorias disponibles en ${ciudadData.name}, registro de postulantes y alertas para evitar cobros indebidos durante procesos de seleccion.`}
+          icon={Briefcase}
+          stats={[
+            { label: 'Vacantes', value: trabajos.length },
+            { label: 'Region', value: ciudadData.departamento.name },
+            { label: 'Sectores', value: SECTORES.length },
+          ]}
+          action={{ href: '#postular-form', label: 'Registrar CV' }}
+        />
+
+        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-8">
+            <EditorialPanel>
+              <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+                <div>
+                  <h2 className="font-heading text-2xl font-bold text-[#1A1A2E]">
+                    {trabajos.length} convocatorias vigentes en {ciudadData.name}
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-[#6B7280]">
+                    Revisa sector, empresa, requisitos y rango salarial antes de postular.
+                  </p>
                 </div>
-                <div className="flex items-center space-x-2 bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-700/30">
-                  <CheckCircle className="w-4 h-4 text-amber-400" />
-                  <span>Vacantes Verificadas Diariamente</span>
-                </div>
+                <Badge>Convocatoria abierta</Badge>
               </div>
-            </div>
-          </header>
+            </EditorialPanel>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Jobs List */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Filter / Meta bar */}
-              <div className="flex items-center justify-between mb-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
-                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                  Mostrando {trabajos.length} convocatorias vigentes en {ciudadData.name}
-                </span>
-                <div className="text-amber-600 dark:text-amber-400 text-sm font-semibold flex items-center space-x-1">
-                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping mr-1 inline-block" />
-                  <span>Convocatoria Abierta</span>
-                </div>
-              </div>
-
-              {/* Jobs List Grid */}
-              <div className="space-y-6">
-                {trabajos.map((job) => (
-                  <article
-                    key={job.id}
-                    className="group bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 hover:border-amber-500/50 dark:hover:border-amber-500/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200/30">
-                            {job.sector}
-                          </span>
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                            {job.type}
-                          </span>
-                          <span className="inline-flex items-center text-xs text-slate-400 dark:text-slate-500">
-                            <Calendar className="w-3.5 h-3.5 mr-1" />
-                            Hace {job.postedDaysAgo} {job.postedDaysAgo === 1 ? 'día' : 'días'}
-                          </span>
-                        </div>
-
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                          {job.title}
-                        </h3>
-
-                        <div className="flex items-center space-x-3 text-sm text-slate-600 dark:text-slate-400">
-                          <span className="flex items-center">
-                            <Building className="w-4 h-4 mr-1 text-slate-400" />
-                            {job.company}
-                          </span>
-                          <span className="flex items-center">
-                            <MapPin className="w-4 h-4 mr-1 text-slate-400" />
-                            {ciudadData.name}
-                          </span>
-                        </div>
-
-                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                          {job.description}
-                        </p>
-
-                        <div className="pt-2">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Requisitos:</h4>
-                          <ul className="list-disc pl-5 text-sm text-slate-600 dark:text-slate-400 space-y-0.5">
-                            {job.requirements.map((req, idx) => (
-                              <li key={idx}>{req}</li>
-                            ))}
-                          </ul>
-                        </div>
+            <div className="space-y-4">
+              {trabajos.map((job) => (
+                <article
+                  key={job.id}
+                  className="group border border-[#E8E4DE] bg-white p-5 shadow-[0_1px_3px_rgba(10,15,30,.08)] transition hover:shadow-[0_8px_24px_rgba(10,15,30,.14)]"
+                >
+                  <div className="flex flex-col justify-between gap-5 md:flex-row md:items-start">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <Badge>{job.sector}</Badge>
+                        <span className="border border-[#E8E4DE] bg-[#F8F5F0] px-2.5 py-1 text-xs font-semibold text-[#6B7280]">
+                          {job.type}
+                        </span>
+                        <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[#6B7280]">
+                          <Calendar className="h-3.5 w-3.5" />
+                          Hace {job.postedDaysAgo} {job.postedDaysAgo === 1 ? 'dia' : 'dias'}
+                        </span>
                       </div>
 
-                      <div className="flex flex-col gap-2 shrink-0 w-full md:w-auto md:text-right md:items-end">
-                        <div className="flex items-center text-emerald-600 dark:text-emerald-400 font-bold text-sm bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-200/20 w-fit">
-                          <DollarSign className="w-4 h-4 mr-1" />
-                          <span>{job.salaryRange}</span>
-                        </div>
+                      <h3 className="font-heading text-2xl font-bold leading-tight text-[#1A1A2E] transition group-hover:text-[#C8102E]">
+                        {job.title}
+                      </h3>
 
-                        <a
-                          href={`#postular-form`}
-                          className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 active:scale-95 transition-all w-full md:w-auto shadow-sm"
-                        >
-                          Postular Rápido
-                          <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
-                        </a>
+                      <div className="mt-3 flex flex-wrap gap-4 text-sm text-[#6B7280]">
+                        <span className="flex items-center gap-1">
+                          <Building className="h-4 w-4 text-[#C8102E]" />
+                          {job.company}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4 text-[#C8102E]" />
+                          {ciudadData.name}
+                        </span>
+                      </div>
+
+                      <p className="mt-3 text-sm leading-7 text-[#6B7280]">{job.description}</p>
+
+                      <div className="mt-4">
+                        <h4 className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1A1A2E]">
+                          Requisitos
+                        </h4>
+                        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-[#6B7280]">
+                          {job.requirements.map((req, index) => (
+                            <li key={`${req}-${index}`}>{req}</li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
-                  </article>
-                ))}
-              </div>
 
-              {/* Informative text about local market */}
-              <section className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 md:p-8 space-y-4 shadow-sm">
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                  Bolsa de Empleo en {ciudadData.name} - Estadísticas y Consejos
-                </h2>
-                <div className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 text-sm leading-relaxed space-y-4">
-                  <p>
-                    La empleabilidad en la región de <strong>{ciudadData.name}</strong> está impulsada por el dinamismo de sectores clave. En el mercado peruano, contar con habilidades blandas, manejo de herramientas ofimáticas y experiencia sectorial verificable son los factores decisivos para superar los procesos de reclutamiento de personal.
-                  </p>
-                  <p>
-                    <strong>Nota de Seguridad:</strong> Todos los procesos de selección mostrados en ClavePerú son 100% gratuitos para el postulante. Nunca realices ningún tipo de pago por concepto de evaluaciones médicas, capacitaciones de ingreso o trámites administrativos a empresas reclutadoras.
-                  </p>
-                  <p>
-                    Antes de postular, prepara tu Certificado Único Laboral y mantén actualizado tu CV en Empleos Perú. Estos servicios son gratuitos y ayudan a validar datos de identidad, antecedentes, formación y experiencia formal frente a empleadores.
-                  </p>
-                </div>
-              </section>
+                    <div className="flex shrink-0 flex-col gap-2 md:w-[180px]">
+                      <div className="flex items-center gap-2 border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700">
+                        <DollarSign className="h-4 w-4" />
+                        {job.salaryRange}
+                      </div>
+                      <a
+                        href="#postular-form"
+                        className="inline-flex items-center justify-center gap-2 bg-[#C8102E] px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-[#9B0B22]"
+                      >
+                        Postular
+                        <ArrowRight className="h-4 w-4" />
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
 
-            {/* Sidebar with Lead Capture Form and Internal Links */}
-            <aside className="space-y-6">
-              {/* Lead Capture for Job Hunters or Employers */}
-              <div id="postular-form" className="bg-gradient-to-br from-slate-900 to-amber-950 text-white rounded-3xl p-6 shadow-xl border border-amber-500/20">
-                <h3 className="text-xl font-bold mb-2 flex items-center">
-                  <UserPlus className="w-5 h-5 mr-2 text-amber-400" />
-                  Registro de Postulante
-                </h3>
-                <p className="text-sm text-amber-200/90 mb-4 leading-relaxed">
-                  ¿Buscas un empleo específico en {ciudadData.name}? Regístrate en nuestra base de talentos. Compartiremos tu perfil directamente con las empresas contratantes cuando se abran nuevas vacantes.
+            <EditorialPanel>
+              <SectionHeader title={`Bolsa de empleo en ${ciudadData.name}`} />
+              <div className="space-y-4 text-sm leading-7 text-[#6B7280]">
+                <p>
+                  La empleabilidad local depende de sectores activos, experiencia verificable y documentacion
+                  ordenada. Mantener tu CV actualizado mejora la evaluacion inicial.
                 </p>
-
-                <form action="/api/v1/leads" method="POST" className="space-y-4">
-                  <input type="hidden" name="cityId" value={ciudadData.id} />
-                  <input type="hidden" name="consent" value="true" />
-
-                  <div>
-                    <label className="block text-xs font-semibold text-amber-200 mb-1">Nombre Completo</label>
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      placeholder="Ej. María Condori"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-amber-800/60 focus:border-amber-400 focus:outline-none text-sm text-white transition"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-amber-200 mb-1">Correo Electrónico</label>
-                    <input
-                      type="email"
-                      name="email"
-                      required
-                      placeholder="maria@example.com"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-amber-800/60 focus:border-amber-400 focus:outline-none text-sm text-white transition"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-amber-200 mb-1">Número Celular (Perú)</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      required
-                      pattern="9[0-9]{8}"
-                      placeholder="Ej. 987654321"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-amber-800/60 focus:border-amber-400 focus:outline-none text-sm text-white transition"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-amber-200 mb-1">Sector de Interés</label>
-                    <select
-                      name="sectorId"
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-850 bg-slate-800 border border-amber-800/60 focus:border-amber-400 focus:outline-none text-sm text-white transition"
-                    >
-                      <option value="">Selecciona tu rubro...</option>
-                      {SECTORES.map((sec) => (
-                        <option key={sec.id} value={sec.id}>
-                          {sec.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-amber-200 mb-1">Resumen Profesional / Oficio</label>
-                    <textarea
-                      name="message"
-                      rows={3}
-                      placeholder="Ej. Egresada técnica de administración con 1 año de experiencia en facturación e inventarios..."
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-amber-800/60 focus:border-amber-400 focus:outline-none text-sm text-white transition resize-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-bold py-3 px-4 rounded-xl transition-all shadow-md text-center text-sm"
-                  >
-                    Postularme / Registrar CV
-                  </button>
-                </form>
+                <p>
+                  Todos los procesos de seleccion deben ser gratuitos para el postulante. Evita pagos por evaluaciones,
+                  capacitaciones de ingreso o tramites administrativos.
+                </p>
               </div>
-
-              {/* Related content / Internal Linking */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-                <h3 className="font-bold text-lg mb-4 text-slate-800 dark:text-slate-100 flex items-center">
-                  <span className="w-2.5 h-2.5 bg-amber-500 rounded-full mr-2" />
-                  Trámites en {ciudadData.name}
-                </h3>
-                <LinkAutomatico type="tramites" ciudadSlug={ciudadData.slug} />
-              </div>
-              <SourceList
-                title="Fuentes oficiales de empleo"
-                sources={pageSources.empleo}
-                image={editorialImages.empleo}
-              />
-            </aside>
+            </EditorialPanel>
           </div>
-        </main>
-      </div>
+
+          <aside className="space-y-6">
+            <EditorialPanel className="scroll-mt-24" id="postular-form">
+              <div className="mb-5 flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-[#C8102E]" />
+                <h2 className="font-heading text-xl font-bold text-[#1A1A2E]">Registro de postulante</h2>
+              </div>
+              <p className="mb-5 text-sm leading-6 text-[#6B7280]">
+                Registra tu perfil para futuras vacantes en {ciudadData.name}.
+              </p>
+
+              <form action="/api/v1/leads" method="POST" className="space-y-4">
+                <input type="hidden" name="cityId" value={ciudadData.id} />
+                <input type="hidden" name="consent" value="true" />
+
+                <Field label="Nombre completo" name="name" placeholder="Nombre y apellido" required />
+                <Field label="Correo electronico" name="email" type="email" placeholder="correo@dominio.com" required />
+                <Field label="Numero celular" name="phone" type="tel" placeholder="987654321" pattern="9[0-9]{8}" required />
+
+                <label className="block">
+                  <span className="mb-1 block font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+                    Sector de interes
+                  </span>
+                  <select
+                    name="sectorId"
+                    required
+                    className="w-full border border-[#E8E4DE] bg-[#F8F5F0] px-3 py-3 text-sm text-[#1A1A2E] outline-none transition focus:border-[#C8102E] focus:bg-white"
+                  >
+                    <option value="">Selecciona tu rubro</option>
+                    {SECTORES.map((sector) => (
+                      <option key={sector.id} value={sector.id}>
+                        {sector.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+                    Resumen profesional
+                  </span>
+                  <textarea
+                    name="message"
+                    rows={3}
+                    placeholder="Experiencia, oficio o disponibilidad"
+                    className="w-full resize-none border border-[#E8E4DE] bg-[#F8F5F0] px-3 py-3 text-sm text-[#1A1A2E] outline-none transition placeholder:text-[#6B7280]/70 focus:border-[#C8102E] focus:bg-white"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  className="w-full bg-[#C8102E] px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white transition hover:bg-[#9B0B22]"
+                >
+                  Registrar CV
+                </button>
+              </form>
+            </EditorialPanel>
+
+            <TrustPanel
+              title="Postula con seguridad"
+              description="No pagues por postulaciones, evaluaciones ni capacitaciones de ingreso."
+              items={['Verifica la empresa.', 'Conserva comunicaciones.', 'No compartas claves ni datos bancarios.']}
+            />
+
+            <EditorialPanel>
+              <SectionHeader title={`Tramites en ${ciudadData.name}`} />
+              <LinkAutomatico type="tramites" ciudadSlug={ciudadData.slug} />
+            </EditorialPanel>
+
+            <SourceList title="Fuentes oficiales de empleo" sources={pageSources.empleo} image={editorialImages.empleo} />
+          </aside>
+        </div>
+      </PortalShell>
     </>
+  );
+}
+
+function Field({
+  label,
+  name,
+  type = 'text',
+  placeholder,
+  required,
+  pattern,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  placeholder: string;
+  required?: boolean;
+  pattern?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
+        {label}
+      </span>
+      <input
+        type={type}
+        name={name}
+        required={required}
+        pattern={pattern}
+        placeholder={placeholder}
+        className="w-full border border-[#E8E4DE] bg-[#F8F5F0] px-3 py-3 text-sm text-[#1A1A2E] outline-none transition placeholder:text-[#6B7280]/70 focus:border-[#C8102E] focus:bg-white"
+      />
+    </label>
   );
 }

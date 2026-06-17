@@ -1,7 +1,6 @@
-// src/components/common/link-automatico.tsx
-import React from 'react';
-import { prisma } from '@/lib/db';
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import { prisma } from '@/lib/db';
 
 interface LinkAutomaticoProps {
   type: 'tramites' | 'hospitales' | 'trabajos';
@@ -9,14 +8,8 @@ interface LinkAutomaticoProps {
   excludeSlug?: string;
 }
 
-/**
- * Componente de Servidor (RSC) de Enlazado Interno Automático.
- * Consulta la base de datos de manera dinámica para recomendar contenidos altamente semánticos 
- * dentro de la misma ubicación geográfica, mejorando el Crawl Budget y transfiriendo PageRank.
- */
 export async function LinkAutomatico({ type, ciudadSlug, excludeSlug }: LinkAutomaticoProps) {
   try {
-    // 1. Obtener la Ciudad
     const ciudad = await prisma.ciudad.findUnique({
       where: { slug: ciudadSlug },
       include: {
@@ -41,18 +34,19 @@ export async function LinkAutomatico({ type, ciudadSlug, excludeSlug }: LinkAuto
         }));
 
       if (links.length === 0) {
-        return <p className="text-xs text-muted-foreground">No hay trámites relacionados en esta ciudad.</p>;
+        return <p className="text-xs leading-6 text-[#6B7280]">No hay tramites relacionados en esta ciudad.</p>;
       }
 
       return (
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
+        <ul className="grid w-full gap-3 md:grid-cols-2">
           {links.map((link) => (
             <li key={link.url}>
               <Link
                 href={link.url}
-                className="block p-3 rounded-lg border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors font-medium text-sm text-primary"
+                className="group flex items-center justify-between gap-3 border border-[#E8E4DE] bg-[#F8F5F0] p-3 text-sm font-semibold text-[#1A1A2E] transition hover:border-[#C8102E]/40 hover:bg-white hover:text-[#C8102E]"
               >
-                {link.title}
+                <span>{link.title}</span>
+                <ArrowRight className="h-4 w-4 shrink-0 transition group-hover:translate-x-1" />
               </Link>
             </li>
           ))}
@@ -62,25 +56,26 @@ export async function LinkAutomatico({ type, ciudadSlug, excludeSlug }: LinkAuto
 
     if (type === 'hospitales') {
       const links = ciudad.hospitales
-        .filter((h) => h.slug !== excludeSlug)
-        .map((h) => ({
-          title: `${h.nombre} (${h.tipo})`,
-          url: `/hospitales/${h.slug}`,
+        .filter((hospital) => hospital.slug !== excludeSlug)
+        .map((hospital) => ({
+          title: `${hospital.nombre} (${hospital.tipo})`,
+          url: `/hospitales/${hospital.slug}`,
         }));
 
       if (links.length === 0) {
-        return <p className="text-xs text-muted-foreground">No hay centros de salud registrados en esta ciudad.</p>;
+        return <p className="text-xs leading-6 text-[#6B7280]">No hay centros de salud registrados en esta ciudad.</p>;
       }
 
       return (
-        <ul className="grid grid-cols-1 gap-2 w-full">
+        <ul className="grid w-full gap-2">
           {links.map((link) => (
             <li key={link.url}>
               <Link
                 href={link.url}
-                className="text-sm font-semibold hover:underline text-primary"
+                className="group flex items-center justify-between gap-3 border border-[#E8E4DE] bg-[#F8F5F0] p-3 text-sm font-semibold text-[#1A1A2E] transition hover:border-[#C8102E]/40 hover:bg-white hover:text-[#C8102E]"
               >
-                {link.title}
+                <span>{link.title}</span>
+                <ArrowRight className="h-4 w-4 shrink-0 transition group-hover:translate-x-1" />
               </Link>
             </li>
           ))}
