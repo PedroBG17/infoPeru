@@ -1,7 +1,7 @@
 // src/app/robots.txt/route.ts
 import { NextResponse } from 'next/server';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dataperu.pe';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://info-peru.vercel.app';
 const IS_PROD = process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'production';
 
 export async function GET() {

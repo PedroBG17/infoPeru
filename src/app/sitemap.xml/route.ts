@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dataperu.pe';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://info-peru.vercel.app';
 
 type SitemapEntry = {
   loc: string;

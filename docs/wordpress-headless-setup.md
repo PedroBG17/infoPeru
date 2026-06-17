@@ -6,9 +6,9 @@ Esta guía detalla los pasos sencillos para configurar WordPress como administra
 
 ## Paso 1: Dónde instalar WordPress
 
-1. **Instalación**: Instala WordPress en un subdominio de tu sitio web (por ejemplo, `cms.dataperu.pe` o `admin.dataperu.pe`).
+1. **Instalación**: Mientras no exista dominio propio, usa la URL productiva de Vercel (`https://info-peru.vercel.app`). Cuando se compre el dominio, el objetivo sera `claveperu.com` y el CMS podria vivir en `cms.claveperu.com` o `admin.claveperu.com`.
 2. **Hosting**: Puedes usar cualquier hosting económico (Hostinger, SiteGround, Bluehost, etc.). Casi todos tienen un botón de **"Instalar WordPress en 1 Clic"**.
-3. **Privacidad**: En los ajustes de WordPress (*Ajustes > Lectura*), te recomendamos marcar la opción *"Disuadir a los motores de búsqueda de indexar este sitio"*. Esto asegura que Google indexe únicamente la web rápida de Next.js (`dataperu.pe`) y no el panel administrador.
+3. **Privacidad**: En los ajustes de WordPress (*Ajustes > Lectura*), te recomendamos marcar la opción *"Disuadir a los motores de búsqueda de indexar este sitio"*. Esto asegura que Google indexe únicamente la web rápida de Next.js (`info-peru.vercel.app` ahora; `claveperu.com` cuando exista dominio) y no el panel administrador.
 
 ---
 
@@ -38,7 +38,7 @@ Para que Next.js sepa cuándo has modificado o creado un artículo en WordPress 
    * **Webhook Name**: `Revalidación Next.js`
    * **Webhook URL**: Copia y pega la dirección de tu API de Next.js con tu secreto de seguridad:
      ```
-     https://tu-dominio-nextjs.pe/api/v1/webhooks/revalidate?secret=TU_REVALIDATION_SECRET
+     https://info-peru.vercel.app/api/v1/webhooks/revalidate?secret=TU_REVALIDATION_SECRET
      ```
 6. Guarda los cambios. ¡Listo! A partir de ahora, cada vez que edites un artículo en WordPress, la caché de Next.js se purgará automáticamente.
 

@@ -69,7 +69,7 @@ export default async function Page({ params }: PageProps) {
           city: ciudadData.name,
           region: ciudadData.departamento.name,
           image: editorialImages.salud.src,
-          url: `https://dataperu.pe/hospitales/${ciudad}`,
+          url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://info-peru.vercel.app'}/hospitales/${ciudad}`,
         };
         return <StructuredData key={hospitalItem.id} type="LocalBusiness" data={businessData} />;
       })}

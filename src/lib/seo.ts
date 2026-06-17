@@ -10,7 +10,7 @@ interface SEOProps {
   ogType?: 'website' | 'article';
 }
 
-const DEFAULT_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dataperu.pe';
+const DEFAULT_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://info-peru.vercel.app';
 
 /**
  * Helper unificado para generar metadatos avanzados de SEO en Next.js (App Router).

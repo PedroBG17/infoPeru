@@ -62,7 +62,7 @@ export const defaultSiteSettings: SiteSettings = {
     ogTitle: 'ClavePerú - Portal Informativo',
     ogDescription:
       'Noticias locales, guías de trámites del Estado y consejos de salud para el norte del Perú.',
-    ogImage: 'https://dataperu.pe/assets/default-og.png',
+    ogImage: 'https://info-peru.vercel.app/assets/default-og.png',
     twitterTitle: 'ClavePerú',
     twitterDescription: 'Portal informativo de trámites y actualidad regional del Perú.',
   },

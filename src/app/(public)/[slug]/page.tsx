@@ -44,7 +44,7 @@ export default async function Page({ params }: PageProps) {
   if (!page) notFound();
 
   const sanitizedContent = safeSanitizeHtml(page.content);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dataperu.pe';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://info-peru.vercel.app';
   const articleUrl = `${siteUrl}/${slug}`;
   const description = page.metaDescription || toPlainText(page.content).substring(0, 155);
 

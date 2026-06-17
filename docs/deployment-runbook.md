@@ -121,22 +121,22 @@ El deploy se activa al hacer push a `main`.
 Revisar estos endpoints:
 
 ```text
-https://dataperu.pe/api/health
-https://dataperu.pe/sitemap.xml
-https://dataperu.pe/robots.txt
+https://info-peru.vercel.app/api/health
+https://info-peru.vercel.app/sitemap.xml
+https://info-peru.vercel.app/robots.txt
 ```
 
 Smoke test contra produccion:
 
 ```bash
-SMOKE_BASE_URL=https://dataperu.pe SMOKE_ADMIN_EMAIL=admin@dataperu.pe SMOKE_ADMIN_PASSWORD='ADMIN_PASSWORD_REAL' corepack pnpm run test:smoke
+SMOKE_BASE_URL=https://info-peru.vercel.app SMOKE_ADMIN_EMAIL='ADMIN_EMAIL_REAL' SMOKE_ADMIN_PASSWORD='ADMIN_PASSWORD_REAL' corepack pnpm run test:smoke
 ```
 
 En PowerShell:
 
 ```powershell
-$env:SMOKE_BASE_URL='https://dataperu.pe'
-$env:SMOKE_ADMIN_EMAIL='admin@dataperu.pe'
+$env:SMOKE_BASE_URL='https://info-peru.vercel.app'
+$env:SMOKE_ADMIN_EMAIL='ADMIN_EMAIL_REAL'
 $env:SMOKE_ADMIN_PASSWORD='ADMIN_PASSWORD_REAL'
 corepack pnpm run test:smoke
 Remove-Item Env:\SMOKE_BASE_URL

@@ -120,7 +120,7 @@ corepack pnpm run verify:supabase-storage
 Para monitoreo externo, configurar un uptime check sobre:
 
 ```text
-https://dataperu.pe/api/health
+https://info-peru.vercel.app/api/health
 ```
 
 Debe responder `200` con `status: ok` y `checks.database: ok`.
