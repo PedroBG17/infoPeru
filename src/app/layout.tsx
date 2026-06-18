@@ -2,11 +2,9 @@
 import '@/styles/globals.css';
 import React from 'react';
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import Link from 'next/link';
 import { Inter, JetBrains_Mono, Playfair_Display } from 'next/font/google';
 import { Providers } from './providers';
-import { adsConfig } from '@/config/ads';
 import { siteConfig } from '@/config/site';
 import { HeaderPrincipal } from '@/components/common/header-principal';
 import { getSiteSettings } from '@/lib/site-settings';
@@ -90,15 +88,6 @@ export default async function RootLayout({
       <body
         className={`${fontSans.variable} ${fontHeading.variable} ${fontMono.variable} min-h-screen bg-background text-foreground font-sans antialiased transition-colors duration-300`}
       >
-        {adsConfig.adsense.enabled && (
-          <Script
-            id="google-adsense-auto-ads"
-            async
-            strategy="afterInteractive"
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsConfig.adsense.client}`}
-            crossOrigin="anonymous"
-          />
-        )}
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             <HeaderPrincipal
